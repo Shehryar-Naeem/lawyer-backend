@@ -178,7 +178,7 @@ const logout = TryCatch(
     });
     res.status(200).json({
       success: true,
-      message: "Logged Out",
+      message: "user logout successfully",
     });
   }
 );
