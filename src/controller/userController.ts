@@ -159,15 +159,27 @@ const loginUser = TryCatch(
 
 const getProfleData = TryCatch(
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    let isProfileComplete = false;
     const id = req.user?._id;
     const user = await User.findById({ _id: id });
     if (!user) {
       return next(new ErrorHandler("user not found", 404));
     }
+    if (
+      user.email === null ||
+      user.name === null ||
+      user.city == null ||
+      user.yourSelf === null ||
+      user.gender === null ||
+      user.postalCode === null
+    ) {
+      isProfileComplete = true;
+    }
     res.status(200).json({
       success: true,
       message: "profle Successfully fetched",
       user,
+      isProfileComplete,
     });
   }
 );
