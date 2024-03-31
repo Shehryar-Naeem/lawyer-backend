@@ -24,7 +24,7 @@ const CreateUser = TryCatch(
 
     const newUser = await User.create({
       name,
-      email,
+      email: email.toLowerCase(),
       password,
     });
 
@@ -42,7 +42,9 @@ const loginUser = TryCatch(
       return next(new ErrorHandler("Please enter email & password", 400));
     }
 
-    const user = await User.findOne({ email }).select("+password");
+    const user = await User.findOne({ email: email.toLowerCase() }).select(
+      "+password"
+    );
 
     if (!user) {
       return next(new ErrorHandler("Invalid email or password", 401));
