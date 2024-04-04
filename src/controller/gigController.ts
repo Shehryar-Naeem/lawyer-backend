@@ -37,8 +37,9 @@ const createGigStep1 = TryCatch(
     if (!title || !category || !description) {
       return next(new ErrorHandler("Please enter all fields", 400));
     }
+    const appentGitTitle= `i will ${title}`
     const gig = await Gig.create({
-      title,
+      title: appentGitTitle,
       category,
       description,
       user: userId,
