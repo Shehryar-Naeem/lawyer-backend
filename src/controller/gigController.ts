@@ -26,10 +26,16 @@ const createGigStep1 = TryCatch(
 
     const lawyerInstance = await Lawyer.findById(_id);
 
+    const totalUserGigs = await Gig.find({ user: userId });
+
     if (!lawyerInstance) {
       return next(new ErrorHandler("Lawyer not found", 404));
     }
-    if (lawyerInstance.gigs && lawyerInstance.gigs.length >= 2) {
+    if (
+      lawyerInstance.gigs &&
+      // lawyerInstance.gigs.length >= 2 &&
+      totalUserGigs.length >= 2
+    ) {
       return next(new ErrorHandler("You can only create up to two gigs", 400));
     }
 
@@ -37,7 +43,7 @@ const createGigStep1 = TryCatch(
     if (!title || !category || !description) {
       return next(new ErrorHandler("Please enter all fields", 400));
     }
-    const appentGitTitle= `i will ${title}`
+    const appentGitTitle = `i will ${title}`;
     const gig = await Gig.create({
       title: appentGitTitle.toLowerCase(),
       category,
@@ -79,37 +85,27 @@ const createGigStep2 = TryCatch(
       );
     }
 
-    const {
-      services,
-      price,
-      additionalServices,
-      basicPrice,
+    const { services, price, additionalServices, basicPrice } = req.body;
 
-    } = req.body;
-
-    if (
-      !services ||
-      !price
-    ) {
+    if (!services || !price) {
       return next(new ErrorHandler("Please enter all fields", 400));
     }
-    if(services.length < 1){
+    if (services.length < 1) {
       return next(new ErrorHandler("Please enter at least one service", 400));
     }
-  if(gig){
-    gig.pricing = {
-      services,
-      price,
+    if (gig) {
+      gig.pricing = {
+        services,
+        price,
+      };
+    }
+    if (additionalServices && basicPrice) {
+      gig.pricing.additionalCost = {
+        services: additionalServices,
+        price: basicPrice,
+      };
+    }
 
-    };
-  }
-  if(additionalServices && basicPrice){
-    gig.pricing.additionalCost = {
-      services: additionalServices,
-      price: basicPrice,
-    };  
-  }
-  
     await gig.save();
     res.status(201).json({
       success: true,
