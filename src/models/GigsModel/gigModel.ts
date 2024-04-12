@@ -34,14 +34,14 @@ const gigsSchema = new mongoose.Schema(
   {
     title: {
       type: String,
-      validate: [validateTitleLength, "Title must have between 3 and 8 words"],
+      // validate: [validateTitleLength, "Title must have between 3 and 8 words"],
     },
     description: {
       type: String,
-      validate: [
-        valiateDiscriptionLength,
-        "Description must have between 30 and 100 words",
-      ],
+      // validate: [
+      //   valiateDiscriptionLength,
+      //   "Description must have between 30 and 100 words",
+      // ],
     },
     pricing: {
       type: pricingAndServiceSchema,

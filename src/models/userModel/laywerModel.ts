@@ -1,3 +1,4 @@
+
 import mongoose from "mongoose";
 import { ILawyer } from "../../types/types.js";
 
