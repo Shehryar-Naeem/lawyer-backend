@@ -5,7 +5,7 @@ import { Gig } from "../models/GigsModel/gigModel.js";
 import { AuthenticatedRequest } from "../types/types.js";
 import mongoose, { Types } from "mongoose";
 import { Lawyer } from "../models/userModel/laywerModel.js";
-import { log } from "console";
+import cloudinary from "cloudinary";
 
 // Define a type for the Gig document including pricing information
 
@@ -18,7 +18,7 @@ const createGigStep1 = TryCatch(
     const userId = req.user?._id;
     const lawyer = req.user?.roles.find((role) => role.roleType === "lawyer");
     console.log(lawyer);
-    
+
     const _id = lawyer?._id;
     if (!_id) {
       return next(
@@ -42,7 +42,7 @@ const createGigStep1 = TryCatch(
     }
 
     console.log(req.body);
-    
+
     const { title, category, description } = req.body;
     if (!title || !category || !description) {
       return next(new ErrorHandler("Please enter all fields", 400));
@@ -69,7 +69,6 @@ const createGigStep2 = TryCatch(
     const userId = req.user?._id as string;
     const lawyer = req.user?.roles.find((role) => role.roleType === "lawyer");
     const lawyerId = lawyer?._id;
-    
 
     if (!lawyerId) {
       return next(
@@ -78,11 +77,11 @@ const createGigStep2 = TryCatch(
     }
 
     const gigId = req.params.id;
-    
+
     const gig = await Gig.findOne({ _id: gigId });
 
     if (!gig) {
-      return next(new ErrorHandler("Gig not found", 404))
+      return next(new ErrorHandler("Gig not found", 404));
     }
 
     if (gig.user.toString() !== userId.toString()) {
@@ -92,10 +91,6 @@ const createGigStep2 = TryCatch(
     }
 
     const { services, price, additionalServices, basicPrice } = req.body;
-
-
-    
-
 
     if (!services || !price) {
       return next(new ErrorHandler("Please enter all fields", 400));
@@ -126,39 +121,70 @@ const createGigStep2 = TryCatch(
 
 const createGigStep3 = TryCatch(
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-    const userId = req.user?._id as string;
-    const lawyer = req.user?.roles.find((role) => role.roleType === "lawyer");
-    const lawyerId = lawyer?._id;
-    if (!lawyerId) {
-      return next(
-        new ErrorHandler("You are not authorized to create a gig", 401)
-      );
-    }
-    const gigId = req.params.id;
-    const gig = await Gig.findOne({ _id: gigId });
+    try {
+      const userId = req.user?._id as string;
+      const lawyer = req.user?.roles.find((role) => role.roleType === "lawyer");
+      const lawyerId = lawyer?._id;
 
-    if (!gig) {
-      return next(new ErrorHandler("Gig not found", 404));
-    }
-    if (gig.user.toString() !== userId.toString()) {
-      return next(
-        new ErrorHandler("You are not authorized to update this gig", 401)
-      );
-    }
+      if (!lawyerId) {
+        return next(
+          new ErrorHandler("You are not authorized to create a gig", 401)
+        );
+      }
 
-    const { images } = req.body;
+      const gigId = req.params.id;
+      const gig = await Gig.findOne({ _id: gigId });
 
-    if (!images) {
-      return next(new ErrorHandler("Please enter all fields", 400));
+      if (!gig) {
+        return next(new ErrorHandler("Gig not found", 404));
+      }
+
+      if (gig.user.toString() !== userId.toString()) {
+        return next(
+          new ErrorHandler("You are not authorized to update this gig", 401)
+        );
+      }
+
+      let avatars = [];
+      const { images } = req.body;
+
+      if (!images) {
+        return next(new ErrorHandler("Please enter images", 400));
+      }
+
+      if (typeof images === "string") {
+        avatars.push(images);
+      } else {
+        avatars = images;
+      }
+
+      const imagesLinks = [];
+      for (let i = 0; i < avatars.length; i++) {
+        const result = await cloudinary.v2.uploader.upload(avatars[i], {
+          folder: "gigs",
+        });
+
+        imagesLinks.push({
+          public_id: result.public_id,
+          url: result.secure_url,
+        });
+      }
+
+      if (gig) {
+        gig.images = imagesLinks as Types.DocumentArray<{
+          url: string;
+          public_id?: string | null | undefined;
+        }>;
+      }
+      await gig.save();
+
+      res.status(201).json({
+        success: true,
+        gig,
+      });
+    } catch (error) {
+      next(error); // Pass the error to the error handling middleware
     }
-    if (gig) {
-      gig.images = images;
-    }
-    await gig.save();
-    res.status(201).json({
-      success: true,
-      gig,
-    });
   }
 );
 

@@ -12,6 +12,7 @@ import { app, server } from "./socket/socket.js";
 import { errorMiddlerware } from "./middleware/error.js";
 import bodyParser from "body-parser";
 import fileUpload from "express-fileupload";
+import cloudinary from "cloudinary";
 // require("dotenv").config();
 // process.on("uncaughtException", (err) => {
 //   console.log(`Error: ${err.message}`);
@@ -19,6 +20,12 @@ import fileUpload from "express-fileupload";
 //   process.exit(1);
 // });
 dotenv.config();
+
+cloudinary.v2.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 const io = new Server(server);
 app.use(cors());
 app.use(cookieParser());
