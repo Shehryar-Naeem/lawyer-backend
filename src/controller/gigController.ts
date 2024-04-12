@@ -37,11 +37,12 @@ const createGigStep1 = TryCatch(
     if (!title || !category || !description) {
       return next(new ErrorHandler("Please enter all fields", 400));
     }
+    const categories = category?.map((cat:any) => cat.toLocaleLowerCase());
     const appentGitTitle= `i will ${title}`
     const gig = await Gig.create({
-      title: appentGitTitle,
-      category,
-      description,
+      title: appentGitTitle.toLocaleLowerCase(),
+      category:categories,
+      description: description.toLocaleLowerCase(),
       user: userId,
       lawyer: _id,
     });
