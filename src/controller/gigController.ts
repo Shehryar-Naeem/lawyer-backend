@@ -17,6 +17,8 @@ const createGigStep1 = TryCatch(
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     const userId = req.user?._id;
     const lawyer = req.user?.roles.find((role) => role.roleType === "lawyer");
+    console.log(lawyer);
+    
     const _id = lawyer?._id;
     if (!_id) {
       return next(
@@ -39,6 +41,8 @@ const createGigStep1 = TryCatch(
       return next(new ErrorHandler("You can only create up to two gigs", 400));
     }
 
+    console.log(req.body);
+    
     const { title, category, description } = req.body;
     if (!title || !category || !description) {
       return next(new ErrorHandler("Please enter all fields", 400));
@@ -65,6 +69,7 @@ const createGigStep2 = TryCatch(
     const userId = req.user?._id as string;
     const lawyer = req.user?.roles.find((role) => role.roleType === "lawyer");
     const lawyerId = lawyer?._id;
+    
 
     if (!lawyerId) {
       return next(
@@ -73,10 +78,11 @@ const createGigStep2 = TryCatch(
     }
 
     const gigId = req.params.id;
+    
     const gig = await Gig.findOne({ _id: gigId });
 
     if (!gig) {
-      return next(new ErrorHandler("Gig not found", 404));
+      return next(new ErrorHandler("Gig not found", 404))
     }
 
     if (gig.user.toString() !== userId.toString()) {
@@ -86,6 +92,10 @@ const createGigStep2 = TryCatch(
     }
 
     const { services, price, additionalServices, basicPrice } = req.body;
+
+
+    
+
 
     if (!services || !price) {
       return next(new ErrorHandler("Please enter all fields", 400));
