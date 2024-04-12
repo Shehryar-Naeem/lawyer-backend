@@ -11,84 +11,22 @@ const valiateDiscriptionLength = (discription: string) => {
 };
 
 const pricingAndServiceSchema = new mongoose.Schema({
-  basic: {
+  services: {
+    type: [String],
+    default: [],
+  },
+  price: {
+    type: Number,
+    default: 0,
+  },
+  additionalCost: {
+    services: {
+      type: [String],
+      default: [],
+    },
     price: {
       type: Number,
       default: 0,
-    },
-    services: {
-      includeServices: {
-        type: [String],
-        default: [],
-      },
-      duration: {
-        type: String,
-      },
-      name: {
-        type: String,
-        default: null,
-      },
-      description: {
-        type: String,
-        default: null,
-      },
-    },
-    additionalCosts: {
-      type: [String],
-      default: [],
-    },
-  },
-  standard: {
-    price: {
-      type: Number,
-    },
-    services: {
-      includeServices: {
-        type: [String],
-        default: [],
-      },
-      duration: {
-        type: String,
-      },
-      name: {
-        type: String,
-        default: null,
-      },
-      description: {
-        type: String,
-        default: null,
-      },
-    },
-    additionalCosts: {
-      type: [String],
-      default: [],
-    },
-  },
-  premium: {
-    price: {
-      type: Number,
-      default: 0,
-    },
-    services: {
-      includeServices: {
-        type: [String],
-        default: [],
-      },
-      duration: {
-        type: String,
-      },
-      name: {
-        type: String,
-        default: null,
-      },
-      description: {
-        type: String,
-        default: null,
-      },
-    },
-    additionalCosts: {
-      type: [String],
-      default: [],
     },
   },
 });
@@ -156,12 +94,8 @@ const gigsSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-   
   }
 );
-
-
-
 
 const Gig = mongoose.model("Gig", gigsSchema);
 export { Gig };

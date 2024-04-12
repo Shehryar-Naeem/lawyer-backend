@@ -80,79 +80,36 @@ const createGigStep2 = TryCatch(
     }
 
     const {
+      services,
+      price,
+      additionalServices,
       basicPrice,
-      basicServices,
-      basicDuration,
-      basicName,
-      basicDescription,
-      basicAdditionalCosts,
-      standardPrice,
-      standardServices,
-      standardDuration,
-      standardName,
-      standardDescription,
-      standardAdditionalCosts,
-      premiumPrice,
-      premiumServices,
-      premiumDuration,
-      premiumName,
-      premiumDescription,
-      premiumAdditionalCosts,
+
     } = req.body;
 
     if (
-      !basicPrice ||
-      !basicServices ||
-      !basicDuration ||
-      !basicName ||
-      !basicDescription ||
-      !basicAdditionalCosts ||
-      !standardPrice ||
-      !standardServices ||
-      !standardDuration ||
-      !standardName ||
-      !standardDescription ||
-      !standardAdditionalCosts ||
-      !premiumPrice ||
-      !premiumServices ||
-      !premiumDuration ||
-      !premiumName ||
-      !premiumDescription ||
-      !premiumAdditionalCosts
+      !services ||
+      !price
     ) {
       return next(new ErrorHandler("Please enter all fields", 400));
     }
-    if (gig && gig.pricing && gig.pricing.basic) {
-      gig.pricing.basic.price = basicPrice as number;
-      gig.pricing.basic.services = {
-        includeServices: basicServices,
-        duration: basicDuration,
-        name: basicName,
-        description: basicDescription,
-      };
-      gig.pricing.basic.additionalCosts = basicAdditionalCosts;
+    if(services.length < 1){
+      return next(new ErrorHandler("Please enter at least one service", 400));
     }
-    if (gig && gig.pricing && gig.pricing.standard) {
-      gig.pricing.standard.price = standardPrice as number;
-      gig.pricing.standard.services = {
-        includeServices: standardServices,
-        duration: standardDuration,
-        name: standardName,
-        description: standardDescription,
-      };
-      gig.pricing.standard.additionalCosts = standardAdditionalCosts;
-    }
+  if(gig){
+    gig.pricing = {
+      services,
+      price,
 
-    if (gig && gig.pricing && gig.pricing.premium) {
-      gig.pricing.premium.price = premiumPrice as number;
-      gig.pricing.premium.services = {
-        includeServices: premiumServices,
-        duration: premiumDuration,
-        name: premiumName,
-        description: premiumDescription,
-      };
-      gig.pricing.premium.additionalCosts = premiumAdditionalCosts;
-    }
+    };
+  }
+  if(additionalServices && basicPrice){
+    gig.pricing.additionalCost = {
+      services: additionalServices,
+      price: basicPrice,
+    };  
+  }
+  
     await gig.save();
     res.status(201).json({
       success: true,
