@@ -13,7 +13,7 @@ import { errorMiddlerware } from "./middleware/error.js";
 import bodyParser from "body-parser";
 import fileUpload from "express-fileupload";
 import cloudinary from "cloudinary";
-// require("dotenv").config();z
+// require("dotenv").config();
 // process.on("uncaughtException", (err) => {
 //   console.log(`Error: ${err.message}`);
 //   console.log(`Shutting down the server due to Uncaught Exception`);

@@ -30,7 +30,7 @@ router
 router
   .route("/get-gig/:id")
   .get(isAuthenticatedUser, authorizeToLawyer, getGig);
-router.route("/get-gigs/me").get(isAuthenticatedUser, authorizeToAdmin, getUserGigs);
+router.route("/get-gigs/me").get(isAuthenticatedUser, authorizeToLawyer, getUserGigs);
 router.route("/get-gigs").get(isAuthenticatedUser, authorizeToAdmin, getGigs);
 
 export default router;
