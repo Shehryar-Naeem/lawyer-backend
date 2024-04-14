@@ -11,6 +11,7 @@ import {
   deleteGig,
   getGig,
   getGigs,
+  getUserGigs,
 } from "../controller/gigController.js";
 
 const router = express.Router();
@@ -27,8 +28,9 @@ router
   .route("/delete-gig/:id")
   .delete(isAuthenticatedUser, authorizeToAdmin, deleteGig);
 router
-  .route("/get-gig/me")
+  .route("/get-gig/:id")
   .get(isAuthenticatedUser, authorizeToLawyer, getGig);
+router.route("/get-gigs/me").get(isAuthenticatedUser, authorizeToAdmin, getUserGigs);
 router.route("/get-gigs").get(isAuthenticatedUser, authorizeToAdmin, getGigs);
 
 export default router;
