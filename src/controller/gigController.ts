@@ -17,7 +17,6 @@ const createGigStep1 = TryCatch(
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     const userId = req.user?._id;
     const lawyer = req.user?.roles.find((role) => role.roleType === "lawyer");
-    console.log(lawyer);
 
     const _id = lawyer?._id;
     if (!_id) {
@@ -121,6 +120,7 @@ const createGigStep2 = TryCatch(
 const createGigStep3 = TryCatch(
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
+      
       const userId = req.user?._id as string;
       const lawyer = req.user?.roles.find((role) => role.roleType === "lawyer");
       const lawyerId = lawyer?._id;
@@ -147,6 +147,7 @@ const createGigStep3 = TryCatch(
       let avatars = [];
       const { images } = req.body;
 
+      
       if (!images) {
         return next(new ErrorHandler("Please enter images", 400));
       }
