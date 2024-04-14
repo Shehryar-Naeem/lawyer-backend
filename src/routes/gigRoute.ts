@@ -27,7 +27,7 @@ router
   .route("/delete-gig/:id")
   .delete(isAuthenticatedUser, authorizeToAdmin, deleteGig);
 router
-  .route("/get-gig/:id")
+  .route("/get-gig/me")
   .get(isAuthenticatedUser, authorizeToLawyer, getGig);
 router.route("/get-gigs").get(isAuthenticatedUser, authorizeToAdmin, getGigs);
 
