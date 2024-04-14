@@ -41,7 +41,6 @@ const createGigStep1 = TryCatch(
       return next(new ErrorHandler("You can only create up to two gigs", 400));
     }
 
-    console.log(req.body);
 
     const { title, category, description } = req.body;
     if (!title || !category || !description) {
