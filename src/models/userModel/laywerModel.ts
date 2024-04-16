@@ -1,4 +1,3 @@
-
 import mongoose from "mongoose";
 import { ILawyer } from "../../types/types.js";
 
@@ -57,9 +56,14 @@ const LawyerSchema = new mongoose.Schema<ILawyer>(
     },
     education: {
       completionYear: {
-        type: Date,
-
-        default: null,
+        startYear: {
+          type: Number,
+          default: null,
+        },
+        endYear: {
+          type: Number,
+          default: null,
+        },
       },
       institution: {
         type: String,
