@@ -264,5 +264,5 @@ export {
   getGig,
   getGigs,
   updateGig,
-  getUserGigs
+  getUserGigs,
 };

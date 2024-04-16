@@ -1,6 +1,9 @@
 import { NextFunction, Request, Response } from "express";
 import { TryCatch } from "../middleware/error.js";
-import { IUpdateAuthenticatedLawyerRequest } from "../types/types.js";
+import {
+  AuthenticatedRequest,
+  IUpdateAuthenticatedLawyerRequest,
+} from "../types/types.js";
 import { User } from "../models/userModel/userModel.js";
 import { ErrorHandler } from "../utils/utility-class.js";
 import { Lawyer } from "../models/userModel/laywerModel.js";
@@ -38,11 +41,7 @@ const createLawyer = TryCatch(
 );
 
 const completeLawyer = TryCatch(
-  async (
-    req: IUpdateAuthenticatedLawyerRequest,
-    res: Response,
-    next: NextFunction
-  ) => {
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     const userId = req.user?._id;
 
     const user = await User.findOne({ _id: userId });
@@ -64,29 +63,36 @@ const completeLawyer = TryCatch(
       officeHours,
       days,
       youSelf,
-      lawFirmName,
-      title,
+      firmName,
+      positionName,
       state,
-      liscenseNumber,
+      licenseNumber,
       experience,
-      education,
+      compoletionYear,
+      institution,
     } = req.body;
+    const completionYearDate = new Date(compoletionYear);
 
     lawyerProifle.availability = {
       officeHours,
       days,
     };
     lawyerProifle.yourSelf = youSelf;
-    lawyerProifle.professionalInfo = {
-      lawFirmName,
-      title,
-      barAdmission: {
-        state,
-        liscenseNumber,
-      },
-      experience,
+    if (firmName && positionName && state && licenseNumber && experience) {
+      lawyerProifle.professionalInfo = {
+        lawFirmName: firmName,
+        title: positionName,
+        barAdmission: {
+          state,
+          licenseNumber,
+        },
+        experience,
+      };
+    }
+    lawyerProifle.education = {
+      completionYear: completionYearDate,
+      institution,
     };
-    lawyerProifle.education = education;
     await lawyerProifle.save();
     res.status(201).json({
       success: true,

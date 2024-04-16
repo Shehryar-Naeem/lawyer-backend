@@ -40,7 +40,7 @@ export interface ILawyer {
     title: string;
     barAdmission: {
       state: string;
-      liscenseNumber: string;
+      licenseNumber: string;
     };
     experience: string;
   };
@@ -50,7 +50,10 @@ export interface ILawyer {
     officeHours: string;
     days: string[];
   };
-  education: string;
+  education: {
+    completionYear: Date;
+    institution: string;
+  };
 }
 export interface IClient {
   user: ObjectId;
@@ -103,4 +106,11 @@ export interface DecodedJwtPayload extends JwtPayload {
 
 export interface IUpdateAuthenticatedLawyerRequest extends Request {
   user?: IUser | null;
+}
+export interface IEducation {
+  // Other properties...
+  education: {
+    completionYear: Date;
+    institution: string;
+  };
 }

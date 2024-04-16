@@ -32,8 +32,6 @@ app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(fileUpload());
 
-
-
 app.use(express.json());
 
 const db = process.env.db as string;
@@ -55,7 +53,6 @@ server.listen(port, () => {
 });
 
 // process.on("unhandledRejection", (err:any) => {
-
 
 //   console.log(`Error: ${err.message}`);
 
