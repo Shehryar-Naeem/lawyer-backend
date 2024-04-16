@@ -54,8 +54,8 @@ const completeLawyer = TryCatch(
     }
     const lawyerId = lawyerRoleId._id;
 
-    const lawyerProifle = await Lawyer.findOne({ _id: lawyerId });
-    if (!lawyerProifle) {
+    const LawyerProfile = await Lawyer.findOne({ _id: lawyerId });
+    if (!LawyerProfile) {
       return next(new ErrorHandler("Lawyer not found", 404));
     }
 
@@ -73,13 +73,13 @@ const completeLawyer = TryCatch(
     } = req.body;
     const completionYearDate = new Date(compoletionYear);
 
-    lawyerProifle.availability = {
+    LawyerProfile.availability = {
       officeHours,
       days,
     };
-    lawyerProifle.yourSelf = youSelf;
+    LawyerProfile.yourSelf = youSelf;
     if (firmName && positionName && state && licenseNumber && experience) {
-      lawyerProifle.professionalInfo = {
+      LawyerProfile.professionalInfo = {
         lawFirmName: firmName,
         title: positionName,
         barAdmission: {
@@ -89,15 +89,15 @@ const completeLawyer = TryCatch(
         experience,
       };
     }
-    lawyerProifle.education = {
+    LawyerProfile.education = {
       completionYear: completionYearDate,
       institution,
     };
-    await lawyerProifle.save();
+    await LawyerProfile.save();
     res.status(201).json({
       success: true,
       message: "Lawyer created successfully",
-      lawyerProifle,
+      LawyerProfile,
     });
   }
 );
@@ -121,14 +121,14 @@ const getLawyerProfile = TryCatch(
     }
 
     const lawyerId = lawyerRoleId._id;
-    const lawyerProifle = await Lawyer.findOne({ _id: lawyerId });
+    const LawyerProfile = await Lawyer.findOne({ _id: lawyerId });
 
-    if (!lawyerProifle) {
+    if (!LawyerProfile) {
       return next(new ErrorHandler("Lawyer not found", 404));
     }
 
     // Check if all specified fields are filled
-    const incompleteFields = checkIncompleteFields(lawyerProifle);
+    const incompleteFields = checkIncompleteFields(LawyerProfile);
 
     if (incompleteFields.length > 0) {
       return res.status(200).json({
@@ -136,13 +136,13 @@ const getLawyerProfile = TryCatch(
         message: `Profile is incomplete. Please fill in the following fields: ${incompleteFields.join(
           ", "
         )}`,
-        lawyerProifle,
+        LawyerProfile,
       });
     }
 
     res.status(201).json({
       success: true,
-      lawyerProifle,
+      LawyerProfile,
     });
   }
 );
@@ -176,13 +176,13 @@ const singalLawyer = TryCatch(
     next: NextFunction
   ) => {
     const lawyerId = req.params.id;
-    const lawyerProifle = await Lawyer.findOne({ _id: lawyerId });
-    if (!lawyerProifle) {
+    const LawyerProfile = await Lawyer.findOne({ _id: lawyerId });
+    if (!LawyerProfile) {
       return next(new ErrorHandler("Lawyer not found", 404));
     }
     res.status(201).json({
       success: true,
-      lawyerProifle,
+      LawyerProfile,
     });
   }
 );
@@ -194,15 +194,15 @@ const verifytheLawyer = TryCatch(
     next: NextFunction
   ) => {
     const lawyerId = req.params.id;
-    const lawyerProifle = await Lawyer.findOne({ _id: lawyerId });
-    if (!lawyerProifle) {
+    const LawyerProfile = await Lawyer.findOne({ _id: lawyerId });
+    if (!LawyerProfile) {
       return next(new ErrorHandler("Lawyer not found", 404));
     }
-    lawyerProifle.isVerified = true;
-    await lawyerProifle.save();
+    LawyerProfile.isVerified = true;
+    await LawyerProfile.save();
     res.status(201).json({
       success: true,
-      lawyerProifle,
+      LawyerProfile,
     });
   }
 );
@@ -219,8 +219,8 @@ const getAllLawyers = TryCatch(
 const deleteLawyer = TryCatch(
   async (req: Request, res: Response, next: NextFunction) => {
     const lawyerId = req.params.id;
-    const lawyerProifle = await Lawyer.findByIdAndDelete(lawyerId);
-    if (!lawyerProifle) {
+    const LawyerProfile = await Lawyer.findByIdAndDelete(lawyerId);
+    if (!LawyerProfile) {
       return next(new ErrorHandler("Lawyer not found", 404));
     }
     res.status(200).json({
