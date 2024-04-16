@@ -68,7 +68,8 @@ const completeLawyer = TryCatch(
       state,
       licenseNumber,
       experience,
-      completionYear,
+   startYear,
+   endYear,
       institution,
     } = req.body;
 
@@ -90,11 +91,12 @@ const completeLawyer = TryCatch(
         experience,
       };
     }
-    if (completionYear && institution) {
-      const completionYearDate = new Date(completionYear);
-
+    if (startYear && endYear && institution) {
       LawyerProfile.education = {
-        completionYear: completionYearDate,
+        completionYear: {
+          startYear,
+          endYear,
+        },
         institution,
       };
     }

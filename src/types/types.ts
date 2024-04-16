@@ -51,7 +51,10 @@ export interface ILawyer {
     days: string[];
   };
   education: {
-    completionYear: Date;
+    completionYear: {
+      startYear: string;
+      endYear: string;
+    };
     institution: string;
   };
 }
