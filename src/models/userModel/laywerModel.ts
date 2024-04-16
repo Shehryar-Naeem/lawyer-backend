@@ -41,7 +41,7 @@ const LawyerSchema = new mongoose.Schema<ILawyer>(
           type: String,
           default: null,
         },
-        liscenseNumber: {
+        licenseNumber: {
           type: String,
           default: null,
         },
@@ -58,6 +58,7 @@ const LawyerSchema = new mongoose.Schema<ILawyer>(
     education: {
       completionYear: {
         type: Date,
+
         default: null,
       },
       institution: {

@@ -71,12 +71,13 @@ const completeLawyer = TryCatch(
       compoletionYear,
       institution,
     } = req.body;
-    const completionYearDate = new Date(compoletionYear);
 
-    LawyerProfile.availability = {
-      officeHours,
-      days,
-    };
+    if (officeHours && days) {
+      LawyerProfile.availability = {
+        officeHours,
+        days,
+      };
+    }
     LawyerProfile.yourSelf = youSelf;
     if (firmName && positionName && state && licenseNumber && experience) {
       LawyerProfile.professionalInfo = {
@@ -89,10 +90,14 @@ const completeLawyer = TryCatch(
         experience,
       };
     }
-    LawyerProfile.education = {
-      completionYear: completionYearDate,
-      institution,
-    };
+    if (compoletionYear && institution) {
+      const completionYearDate = new Date(compoletionYear);
+
+      LawyerProfile.education = {
+        completionYear: completionYearDate,
+        institution,
+      };
+    }
     await LawyerProfile.save();
     res.status(201).json({
       success: true,
