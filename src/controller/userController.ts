@@ -207,7 +207,12 @@ const updateProfile = TryCatch(
     const userId = req.user?._id as string;
 
     try {
-      const updatedFields = req.body;
+      let updatedFields = req.body;
+
+      // Convert email to lowercase if it exists in the request body
+      if (updatedFields.email) {
+        updatedFields.email = updatedFields.email.toLowerCase();
+      }
 
       // Find the user by ID and update the fields
       const updatedUser = await User.findByIdAndUpdate(userId, updatedFields, {
@@ -231,6 +236,7 @@ const updateProfile = TryCatch(
     }
   }
 );
+
 
 const updateProfilePicture = TryCatch(
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
@@ -283,7 +289,7 @@ const updateProfilePicture = TryCatch(
 
 const forgetPassword = TryCatch(
   async (req: Request, res: Response, next: NextFunction) => {
-    const user = await User.findOne({ email: req.body.email });
+    const user = await User.findOne({ email: req.body.email.toLowerCase() });
     if (!user) {
       return next(new ErrorHandler("User not found", 404));
     }
