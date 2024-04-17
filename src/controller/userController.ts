@@ -244,18 +244,21 @@ const updateProfilePicture = TryCatch(
 
       if (req.body.avatar !== "") {
         const imageId = user?.avatar?.public_id;
-        
+
         // If the user already has a profile picture, delete it from Cloudinary
         if (imageId) {
           await cloudinary.v2.uploader.destroy(imageId);
         }
 
         // Upload the new profile picture to Cloudinary
-        const uploadedImage = await cloudinary.v2.uploader.upload(req.body.avatar, {
-          folder: "avatars",
-          width: 150,
-          crop: "scale",
-        });
+        const uploadedImage = await cloudinary.v2.uploader.upload(
+          req.body.avatar,
+          {
+            folder: "avatars",
+            width: 150,
+            crop: "scale",
+          }
+        );
 
         // Update the user's avatar information with the new Cloudinary data
         user.avatar = {
@@ -266,7 +269,7 @@ const updateProfilePicture = TryCatch(
         // Save the updated user information
         user = await user.save();
       }
-      
+
       res.status(200).json({
         success: true,
         message: "Profile picture updated successfully",
@@ -278,7 +281,6 @@ const updateProfilePicture = TryCatch(
   }
 );
 
-
 const forgetPassword = TryCatch(
   async (req: Request, res: Response, next: NextFunction) => {
     const user = await User.findOne({ email: req.body.email });
@@ -287,9 +289,8 @@ const forgetPassword = TryCatch(
     }
     const resetToken = user.getResetPasswordToken();
     await user.save({ validateBeforeSave: false });
-    const resetUrl = `${req.protocol}://${req.get(
-      "host"
-    )}/api/user/resetpassword/${resetToken}`;
+    const liveUrl = "https://lawyer-market.vercel.app/";
+    const resetUrl = `${process.env.FRONTEND_URL || liveUrl}user/resetpassword/${resetToken}`;
     const message = `Your password reset token is as follow:\n\n${resetUrl}\n\nIf you have not requested this email, then ignore it.`;
     try {
       await sendMail(user.email, "Password reset token", message);
