@@ -71,6 +71,7 @@ const completeLawyer = TryCatch(
       startYear,
       endYear,
       institution,
+      degreeName
     } = req.body;
 
     if (days) {
@@ -91,13 +92,14 @@ const completeLawyer = TryCatch(
         experience,
       };
     }
-    if (startYear && endYear && institution) {
+    if (startYear && endYear && institution && degreeName) {
       LawyerProfile.education = {
         completionYear: {
           startYear,
           endYear,
         },
         institution,
+        degreeName
       };
     }
     await LawyerProfile.save();

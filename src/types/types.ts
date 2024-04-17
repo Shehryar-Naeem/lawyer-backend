@@ -56,6 +56,7 @@ export interface ILawyer {
       endYear: number;
     };
     institution: string;
+    degreeName: string;
   };
 }
 export interface IClient {

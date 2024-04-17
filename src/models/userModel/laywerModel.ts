@@ -69,6 +69,10 @@ const LawyerSchema = new mongoose.Schema<ILawyer>(
         type: String,
         default: null,
       },
+      degreeName:{
+        type: String,
+        default: null,
+      }
     },
     numOfReviews: {
       type: Number,
