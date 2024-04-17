@@ -10,6 +10,7 @@ import {
   updateProfile,
   getAllUser,
   deleteUserByAdmin,
+  updateProfilePicture,
   // completeLawyerProfile,
 } from "../controller/userController.js";
 import {
@@ -24,6 +25,7 @@ router.route("/login-user").post(loginUser);
 router.route("/passwor/forget").post(forgetPassword);
 router.route("/password/reset/:token").put(restPassword);
 router.route("/logout").get(isAuthenticatedUser, logout);
+router.route("/update-profile-pic").put(isAuthenticatedUser, updateProfilePicture);
 router.route("/get-profle").get(isAuthenticatedUser, getProfleData);
 router.route("/update-user-password").put(isAuthenticatedUser, updatePasswrord);
 router.route("/update-login-detail").put(isAuthenticatedUser, updateProfile);

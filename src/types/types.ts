@@ -3,7 +3,7 @@ import { JwtPayload } from "jsonwebtoken";
 import mongoose, { Document, ObjectId, Types } from "mongoose";
 
 type avatar = {
-  public_id: ObjectId;
+  public_id: string;
   url: string;
 };
 export interface IRoles {

@@ -13,6 +13,7 @@ import { TryCatch } from "../middleware/error.js";
 import { ErrorHandler } from "../utils/utility-class.js";
 import sendToken from "../utils/jwtToken.js";
 import crypto from "crypto";
+import cloudinary from "cloudinary";
 
 const CreateUser = TryCatch(
   async (
@@ -231,6 +232,42 @@ const updateProfile = TryCatch(
   }
 );
 
+const updateProfilePicture = TryCatch(
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    const id = req.user?._id;
+    const user = await User.findById({ _id: id });
+    if (!user) {
+      return next(new ErrorHandler("User not found", 404));
+    }
+
+    if (req.body.avatar !== "") {
+      const user = await User.findById(req.user?._id);
+
+      const imageId = user?.avatar.public_id as string;
+
+      await cloudinary.v2.uploader.destroy(imageId);
+
+      const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
+        folder: "avatars",
+        width: 150,
+        crop: "scale",
+      });
+      if (user) {
+        user.avatar = {
+          public_id: myCloud.public_id,
+          url: myCloud.secure_url,
+        };
+      }
+    }
+    await user.save();
+    res.status(200).json({
+      success: true,
+      message: "Profile picture updated successfully",
+      user,
+    });
+  }
+);
+
 const forgetPassword = TryCatch(
   async (req: Request, res: Response, next: NextFunction) => {
     const user = await User.findOne({ email: req.body.email });
@@ -370,4 +407,5 @@ export {
   forgetPassword,
   restPassword,
   updatePasswrord,
+  updateProfilePicture,
 };
