@@ -47,7 +47,7 @@ export interface ILawyer {
 
   isVerified: boolean;
   availability: {
-    officeHours: string;
+    // officeHours: string;
     days: string[];
   };
   education: {

@@ -60,7 +60,7 @@ const completeLawyer = TryCatch(
     }
 
     const {
-      officeHours,
+      // officeHours,
       days,
       youSelf,
       firmName,
@@ -68,14 +68,14 @@ const completeLawyer = TryCatch(
       state,
       licenseNumber,
       experience,
-   startYear,
-   endYear,
+      startYear,
+      endYear,
       institution,
     } = req.body;
 
-    if (officeHours && days) {
+    if (days) {
       LawyerProfile.availability = {
-        officeHours,
+        // officeHours,
         days,
       };
     }

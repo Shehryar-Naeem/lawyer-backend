@@ -10,10 +10,10 @@ const LawyerSchema = new mongoose.Schema<ILawyer>(
       unique: true,
     },
     availability: {
-      officeHours: {
-        type: String,
-        required: false,
-      },
+      // officeHours: {
+      //   type: String,
+      //   required: false,
+      // },
       days: {
         type: [String],
         required: false,
