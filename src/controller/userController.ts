@@ -234,39 +234,50 @@ const updateProfile = TryCatch(
 
 const updateProfilePicture = TryCatch(
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-    const id = req.user?._id;
-    const user = await User.findById({ _id: id });
-    if (!user) {
-      return next(new ErrorHandler("User not found", 404));
-    }
+    const userId = req.user?._id;
+    try {
+      let user = await User.findById(userId);
 
-    if (req.body.avatar !== "") {
-      const user = await User.findById(req.user?._id);
-
-      const imageId = user?.avatar.public_id as string;
-
-      await cloudinary.v2.uploader.destroy(imageId);
-
-      const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
-        folder: "avatars",
-        width: 150,
-        crop: "scale",
-      });
-      if (user) {
-        user.avatar = {
-          public_id: myCloud.public_id,
-          url: myCloud.secure_url,
-        };
+      if (!user) {
+        return next(new ErrorHandler("User not found", 404));
       }
+
+      if (req.body.avatar !== "") {
+        const imageId = user?.avatar?.public_id;
+        
+        // If the user already has a profile picture, delete it from Cloudinary
+        if (imageId) {
+          await cloudinary.v2.uploader.destroy(imageId);
+        }
+
+        // Upload the new profile picture to Cloudinary
+        const uploadedImage = await cloudinary.v2.uploader.upload(req.body.avatar, {
+          folder: "avatars",
+          width: 150,
+          crop: "scale",
+        });
+
+        // Update the user's avatar information with the new Cloudinary data
+        user.avatar = {
+          public_id: uploadedImage.public_id,
+          url: uploadedImage.secure_url,
+        };
+
+        // Save the updated user information
+        user = await user.save();
+      }
+      
+      res.status(200).json({
+        success: true,
+        message: "Profile picture updated successfully",
+        user,
+      });
+    } catch (error) {
+      return next(new ErrorHandler("Failed to update profile picture", 500));
     }
-    await user.save();
-    res.status(200).json({
-      success: true,
-      message: "Profile picture updated successfully",
-      user,
-    });
   }
 );
+
 
 const forgetPassword = TryCatch(
   async (req: Request, res: Response, next: NextFunction) => {
