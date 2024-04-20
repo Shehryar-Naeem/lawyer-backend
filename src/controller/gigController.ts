@@ -198,7 +198,7 @@ const getGigs = async (
     const apiFeature = new ApiFeatures<IGig>(
       Gig.find().populate({
         path: "user",
-        select: "city",
+        select: "city avatar",
       
       }),        
       req.query as any
