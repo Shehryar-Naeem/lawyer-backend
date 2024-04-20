@@ -1,4 +1,5 @@
-import mongoose from "mongoose";
+import mongoose, { Model } from "mongoose";
+import { IGig } from "../../types/types.js";
 const validateTitleLength = (title: string) => {
   const words = title.split(" ");
   // return words.length <= 8;
@@ -14,10 +15,12 @@ const pricingAndServiceSchema = new mongoose.Schema({
   services: {
     type: [String],
     default: [],
+    index: true, 
   },
   price: {
     type: Number,
     default: 0,
+    index: true, 
   },
   additionalCost: {
     services: {
@@ -97,5 +100,6 @@ const gigsSchema = new mongoose.Schema(
   }
 );
 
-const Gig = mongoose.model("Gig", gigsSchema);
+const Gig: Model<IGig> = mongoose.model<IGig>('Gig', gigsSchema);
+
 export { Gig };

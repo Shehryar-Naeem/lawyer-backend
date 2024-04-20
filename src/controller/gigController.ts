@@ -1,8 +1,12 @@
 import { NextFunction, Request, Response } from "express";
 import { TryCatch } from "../middleware/error.js";
-import { ErrorHandler } from "../utils/utility-class.js";
+import {
+  ApiFeatures,
+  ErrorHandler,
+  QueryString,
+} from "../utils/utility-class.js";
 import { Gig } from "../models/GigsModel/gigModel.js";
-import { AuthenticatedRequest } from "../types/types.js";
+import { AuthenticatedRequest, IGig } from "../types/types.js";
 import mongoose, { Types } from "mongoose";
 import { Lawyer } from "../models/userModel/laywerModel.js";
 import cloudinary from "cloudinary";
@@ -39,7 +43,6 @@ const createGigStep1 = TryCatch(
     ) {
       return next(new ErrorHandler("You can only create up to two gigs", 400));
     }
-
 
     const { title, category, description } = req.body;
     if (!title || !category || !description) {
@@ -120,7 +123,6 @@ const createGigStep2 = TryCatch(
 const createGigStep3 = TryCatch(
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-      
       const userId = req.user?._id as string;
       const lawyer = req.user?.roles.find((role) => role.roleType === "lawyer");
       const lawyerId = lawyer?._id;
@@ -147,7 +149,6 @@ const createGigStep3 = TryCatch(
       let avatars = [];
       const { images } = req.body;
 
-      
       if (!images) {
         return next(new ErrorHandler("Please enter images", 400));
       }
@@ -171,10 +172,7 @@ const createGigStep3 = TryCatch(
       }
 
       if (gig) {
-        gig.images = imagesLinks as Types.DocumentArray<{
-          url: string;
-          public_id?: string | null | undefined;
-        }>;
+        gig.images = imagesLinks;
       }
       await gig.save();
 
@@ -188,15 +186,78 @@ const createGigStep3 = TryCatch(
   }
 );
 
-const getGigs = TryCatch(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const gigs = await Gig.find();
+const getGigs = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const resultPerPage: number = 4;
+    const gigsCount: number = await Gig.countDocuments();
+
+    const apiFeature = new ApiFeatures<IGig>(
+      Gig.find().populate({
+        path: "user",
+        select: "city",
+      
+      }),        
+      req.query as any
+    )
+      .searchByFields()
+      .filter()
+      .pagination(resultPerPage);
+
+    const gigs = await apiFeature.query; // Ensuring execution of the query
+
     res.status(200).json({
       success: true,
       gigs,
+      gigsCount,
+      filterporduct: gigs.length,
     });
+  } catch (error) {
+    next(error);
   }
-);
+};
+
+
+
+
+// const getGigs = async (req: Request, res: Response, next: NextFunction) => {
+//   try {
+//     const userCity = req.query.city;
+
+//     const gigs = await Gig.aggregate([
+//       {
+//         $lookup: {
+//           from: 'users', // the collection name in the database
+//           localField: 'user', // the field from the gigs collection
+//           foreignField: '_id', // the corresponding field in the users collection
+//           as: 'user'
+//         }
+//       },
+//       {
+//         $match: { 'user.city': userCity }
+//       },
+//       {
+//         $unwind: '$user' // Optionally unwind if you're expecting one user per gig
+//       }
+//     ]);
+
+//     if (!gigs.length) {
+//       return next(new ErrorHandler("No gigs found for the specified city", 404));
+//     }
+
+//     res.status(200).json({
+//       success: true,
+//       count: gigs.length,
+//       gigs
+//     });
+//   } catch (error) {
+//     next(new ErrorHandler("Server error", 500));
+//   }
+// };
+
 const getGig = TryCatch(
   async (req: Request, res: Response, next: NextFunction) => {
     const gig = await Gig.findById(req.params.id);

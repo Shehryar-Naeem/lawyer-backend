@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { JwtPayload } from "jsonwebtoken";
-import mongoose, { Document, ObjectId, Types } from "mongoose";
+import mongoose, { Document, ObjectId, Types,Model } from "mongoose";
 
 type avatar = {
   public_id: string;
@@ -118,3 +118,39 @@ export interface IEducation {
     institution: string;
   };
 }
+
+
+
+interface IGig extends Document {
+  title: string;
+  description: string;
+  pricing: {
+    services: string[];
+    price: number;
+    additionalCost?: {
+      services: string[];
+      price: number;
+    };
+  };
+  images: Array<{
+    public_id: string;
+    url: string;
+  }>;
+  category: string[];
+  reviews: Array<{
+    user: typeof mongoose.Schema.Types.ObjectId;
+    name: string;
+    rating: number;
+    comment: string;
+  }>;
+  user: typeof mongoose.Schema.Types.ObjectId;
+  lawyer: typeof mongoose.Schema.Types.ObjectId;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+// Assuming you have already defined a mongoose schema for Gig somewhere
+
+
+// Convert schema to TypeScript model type
+export { IGig };

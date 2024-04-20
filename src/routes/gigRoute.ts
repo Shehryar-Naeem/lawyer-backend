@@ -31,6 +31,6 @@ router
   .route("/get-gig/:id")
   .get(isAuthenticatedUser, authorizeToLawyer, getGig);
 router.route("/get-gigs/me").get(isAuthenticatedUser, authorizeToLawyer, getUserGigs);
-router.route("/get-gigs").get(isAuthenticatedUser, authorizeToAdmin, getGigs);
+router.route("/get-gigs").get(isAuthenticatedUser, getGigs);
 
 export default router;
