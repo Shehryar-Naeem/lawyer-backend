@@ -212,6 +212,7 @@ const getGigs = async (
     res.status(200).json({
       success: true,
       gigs,
+      resultPerPage,
       gigsCount,
       filterporduct: gigs.length,
     });
