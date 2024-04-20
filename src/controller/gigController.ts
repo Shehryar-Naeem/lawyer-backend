@@ -214,7 +214,7 @@ const getGigs = async (
       gigs,
       resultPerPage,
       gigsCount,
-      filterporduct: gigs.length,
+      filterGigCount: gigs.length,
     });
   } catch (error) {
     next(error);
