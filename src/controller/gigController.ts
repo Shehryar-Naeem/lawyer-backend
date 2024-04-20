@@ -192,7 +192,7 @@ const getGigs = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const resultPerPage: number = 4;
+    const resultPerPage: number = 2;
     const gigsCount: number = await Gig.countDocuments();
 
     const apiFeature = new ApiFeatures<IGig>(
