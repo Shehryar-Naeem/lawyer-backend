@@ -207,7 +207,8 @@ const getGigs = async (
       .filter()
       .pagination(resultPerPage);
 
-    const gigs = await apiFeature.query; // Ensuring execution of the query
+    const gigs = await apiFeature.query; 
+    
 
     res.status(200).json({
       success: true,
