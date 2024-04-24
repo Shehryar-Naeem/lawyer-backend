@@ -262,16 +262,26 @@ const getGigs = async (
 
 const getGig = TryCatch(
   async (req: Request, res: Response, next: NextFunction) => {
-    const gig = await Gig.findById(req.params.id);
-    if (!gig) {
-      return next(new ErrorHandler("Gig not found", 404));
+    try {
+      const gig = await Gig.findById(req.params.id.toString())
+        .populate('user', '-password') // Populate the 'user' field, excluding password
+        .populate('lawyer'); // Populate the 'lawyer' field
+
+      if (!gig) {
+        return next(new ErrorHandler("Gig not found", 404));
+      }
+
+      res.status(200).json({
+        success: true,
+        gig,
+      });
+    } catch (error) {
+      // Handle any errors
+      return next(error);
     }
-    res.status(200).json({
-      success: true,
-      gig,
-    });
   }
 );
+
 
 const getUserGigs = TryCatch(
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {

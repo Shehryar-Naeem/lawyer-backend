@@ -247,12 +247,11 @@ const updateProfilePicture = TryCatch(
       if (!user) {
         return next(new ErrorHandler("User not found", 404));
       }
-      console.log(req.body.avatar);
-      
+
       if (req.body.avatar !== "") {
         const imageId = user?.avatar?.public_id;
 
-
+        // If the user already has a profile picture, delete it from Cloudinary
         if (imageId) {
           await cloudinary.v2.uploader.destroy(imageId);
         }
