@@ -29,6 +29,7 @@ cloudinary.v2.config({
 const io = new Server(server);
 app.use(cors());
 app.use(cookieParser());
+app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(fileUpload());
 
