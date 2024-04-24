@@ -5,7 +5,7 @@ import dotenv from "dotenv";
 import userRouter from "./routes/userRoute.js";
 import lawyerRouter from "./routes/lawyerRoute.js";
 import gigRouter from "./routes/gigRoute.js";
-import clientCaseRouter from "./routes/caseRoute.js";
+import clientCaseRouter from "./routes/clientPostRoute.js";
 import cors from "cors";
 import { Server } from "socket.io";
 import { app, server } from "./socket/socket.js";
@@ -40,7 +40,7 @@ connectDb(db);
 app.use("/api/user", userRouter);
 app.use("/api/lawyer", lawyerRouter);
 app.use("/api/gig", gigRouter);
-app.use("/api/case", clientCaseRouter);
+app.use("/api/client-post", clientCaseRouter);
 io.on("connection", (socket) => {
   console.log("a user connected");
 });

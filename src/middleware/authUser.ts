@@ -24,7 +24,7 @@ export const isAuthenticatedUser = TryCatch(
 
 export const authorizeToLawyer = TryCatch(
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-    const user = req.user?.roles.find((role) => role.roleType === "lawyer");
+    const user = req.user?.roles.some((role) => role.roleType === "lawyer");
     if (!user) {
       return next(
         new ErrorHandler("You are not authorized to access this resource", 403)
@@ -45,6 +45,18 @@ export const authorizeToAdmin = TryCatch(
   }
 );
 
+
+export const authorizeToClient = TryCatch(
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    const user = req.user?.roles.some((role) => role.roleType === "client");
+    if (!user) {
+      return next(
+        new ErrorHandler("You are not authorized to access this resource", 403)
+      );
+    }
+    next();
+  }
+);
 
 // export const authorizeRoles = (...roles: string[]) => {
 //   return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {

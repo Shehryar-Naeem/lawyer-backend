@@ -10,7 +10,7 @@ const clientCaseSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    pricing: {
+    budget: {
       type: Number,
       required: true,
     },
@@ -18,19 +18,19 @@ const clientCaseSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    documents: [
-      {
-        public_id: {
-          type: String,
-          default: null,
-        },
-        url: {
-          type: String,
-          required: false,
-          default: null,
-        },
-      },
-    ],
+    // documents: [
+    //   {
+    //     public_id: {
+    //       type: String,
+    //       default: null,
+    //     },
+    //     url: {
+    //       type: String,
+    //       required: false,
+    //       default: null,
+    //     },
+    //   },
+    // ],
     expertise: [
       {
         type: String,
