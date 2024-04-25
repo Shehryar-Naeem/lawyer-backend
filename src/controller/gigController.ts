@@ -286,7 +286,11 @@ const getGig = TryCatch(
 const getUserGigs = TryCatch(
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     const userId = req.user?._id as string;
-    const gigs = await Gig.find({ user: userId });
+    const gigs = await Gig.find({ user: userId }).populate('user', '-password') // Populate the 'user' field, excluding password
+    .populate('lawyer');
+
+
+    
     if (!gigs) {
       return next(new ErrorHandler("Gigs not found", 404));
     }
