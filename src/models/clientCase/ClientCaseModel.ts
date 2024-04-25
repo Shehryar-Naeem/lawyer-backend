@@ -44,9 +44,9 @@ const clientCaseSchema = new mongoose.Schema(
       default: "looking",
     },
     locationPreference: {
-        type: String,
-        required: false,
-        },
+      type: String,
+      required: false,
+    },
   },
   {
     timestamps: true,

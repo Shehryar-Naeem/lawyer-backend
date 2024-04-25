@@ -66,6 +66,18 @@ const gigsSchema = new mongoose.Schema(
     category: {
       type: [String],
     },
+    numOfReviews: {
+      type: Number,
+      default: 0,
+    },
+    ratings: {
+      type: Number,
+      default: 0,
+    },
+    city: {
+      type: String,
+      default: null,
+    },
     reviews: [
       {
         user: {

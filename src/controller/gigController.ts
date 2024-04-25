@@ -7,7 +7,6 @@ import {
 } from "../utils/utility-class.js";
 import { Gig } from "../models/GigsModel/gigModel.js";
 import { AuthenticatedRequest, IGig } from "../types/types.js";
-import mongoose, { Types } from "mongoose";
 import { Lawyer } from "../models/userModel/laywerModel.js";
 import cloudinary from "cloudinary";
 
@@ -48,6 +47,7 @@ const createGigStep1 = TryCatch(
     if (!title || !category || !description) {
       return next(new ErrorHandler("Please enter all fields", 400));
     }
+    const userCity = req.user?.city;
     const appentGitTitle = `i will ${title}`;
     const gig = await Gig.create({
       title: appentGitTitle.toLowerCase(),
@@ -55,6 +55,7 @@ const createGigStep1 = TryCatch(
       description: description.toLowerCase(),
       user: userId,
       lawyer: _id,
+      city: userCity,
     });
     lawyerInstance.gigs.push(gig?._id);
     await lawyerInstance.save();

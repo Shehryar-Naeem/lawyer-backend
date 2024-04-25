@@ -14,6 +14,7 @@ import { ErrorHandler } from "../utils/utility-class.js";
 import sendToken from "../utils/jwtToken.js";
 import crypto from "crypto";
 import cloudinary from "cloudinary";
+import { Gig } from "../models/GigsModel/gigModel.js";
 
 const CreateUser = TryCatch(
   async (
@@ -199,11 +200,7 @@ const logout = TryCatch(
 );
 
 const updateProfile = TryCatch(
-  async (
-    req: updateAuthenticatedRequest,
-    res: Response,
-    next: NextFunction
-  ) => {
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     const userId = req.user?._id as string;
 
     try {
@@ -212,6 +209,22 @@ const updateProfile = TryCatch(
       // Convert email to lowercase if it exists in the request body
       if (updatedFields.email) {
         updatedFields.email = updatedFields.email.toLowerCase();
+      }
+      if (updatedFields.city) {
+        const user: any = req.user?._id;
+
+        const userGigs: any = await Gig.find({ user: user.toString() });
+        
+        if (userGigs.length > 0) {
+          userGigs.map(async (gig: any) => {
+            gig.city = updatedFields.city;
+            await gig.save();
+          });
+        }
+        const userCity = req.user?.city;
+        
+        
+        updatedFields.city = updatedFields.city.toLowerCase();
       }
 
       // Find the user by ID and update the fields
@@ -236,7 +249,6 @@ const updateProfile = TryCatch(
     }
   }
 );
-
 
 const updateProfilePicture = TryCatch(
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
@@ -296,7 +308,9 @@ const forgetPassword = TryCatch(
     const resetToken = user.getResetPasswordToken();
     await user.save({ validateBeforeSave: false });
     const liveUrl = "https://lawyer-market.vercel.app/";
-    const resetUrl = `${process.env.FRONTEND_URL || liveUrl}user/resetpassword/${resetToken}`;
+    const resetUrl = `${
+      process.env.FRONTEND_URL || liveUrl
+    }user/resetpassword/${resetToken}`;
     const message = `Your password reset token is as follow:\n\n${resetUrl}\n\nIf you have not requested this email, then ignore it.`;
     try {
       await sendMail(user.email, "Password reset token", message);
