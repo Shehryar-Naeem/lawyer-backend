@@ -49,7 +49,7 @@ const createGigStep1 = TryCatch(
     }
     const userCity = req.user?.city;
     if (userCity===null) {
-      return next(new ErrorHandler("Please update your profile", 400));
+      return next(new ErrorHandler("Please update your profile first", 400));
     }
     const appentGitTitle = `${title}`;
     const gig = await Gig.create({
