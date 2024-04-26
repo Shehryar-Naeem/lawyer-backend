@@ -33,7 +33,7 @@ export const authorizeToLawyer = TryCatch(
     next();
   }
 );
-export const authorizeToAdmin = TryCatch( 
+export const authorizeToAdmin = TryCatch(
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     const user = req.user?.roles.find((role) => role.roleType === "admin");
     if (!user) {
@@ -44,7 +44,6 @@ export const authorizeToAdmin = TryCatch(
     next();
   }
 );
-
 
 export const authorizeToClient = TryCatch(
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
