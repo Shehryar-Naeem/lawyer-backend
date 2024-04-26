@@ -221,7 +221,7 @@ const updateProfile = TryCatch(
             await gig.save();
           });
         }
-        const userCity = req.user?.city;
+        
         
         
         updatedFields.city = updatedFields.city.toLowerCase();
