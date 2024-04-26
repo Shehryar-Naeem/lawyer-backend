@@ -13,6 +13,7 @@ import {
   getGigById,
   getGigs,
   getUserGigs,
+  updateGig,
 } from "../controller/gigController.js";
 
 const router = express.Router();
