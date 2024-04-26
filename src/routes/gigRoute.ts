@@ -10,6 +10,7 @@ import {
   createGigStep3,
   deleteGig,
   getGig,
+  getGigById,
   getGigs,
   getUserGigs,
 } from "../controller/gigController.js";
@@ -29,7 +30,8 @@ router
   .delete(isAuthenticatedUser, authorizeToAdmin, deleteGig);
 router
   .route("/get-gig/:id")
-  .get(isAuthenticatedUser, authorizeToLawyer, getGig);
+  .get(isAuthenticatedUser, getGig);
+router.route("/get-gig-by-id/:id").get(isAuthenticatedUser, authorizeToLawyer,getGigById);
 router.route("/get-gigs/me").get(isAuthenticatedUser, authorizeToLawyer, getUserGigs);
 router.route("/get-gigs").get(getGigs);
 

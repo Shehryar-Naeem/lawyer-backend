@@ -283,6 +283,21 @@ const getGig = TryCatch(
   }
 );
 
+const getGigById = TryCatch(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const gig = await Gig.findById({ _id: req.params.id.toString()});
+
+    if (!gig) {
+      return next(new ErrorHandler("Gig not found", 404));
+    }
+
+    res.status(200).json({
+      success: true,
+      gig,
+    });
+  }
+);
+
 
 const getUserGigs = TryCatch(
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
@@ -304,6 +319,7 @@ const getUserGigs = TryCatch(
 
 const updateGig = TryCatch(
   async (req: Request, res: Response, next: NextFunction) => {
+    
     const gig = await Gig.findByIdAndUpdate(req.params.id as string, req.body, {
       new: true,
       runValidators: true,
@@ -343,4 +359,5 @@ export {
   getGigs,
   updateGig,
   getUserGigs,
+  getGigById,
 };
