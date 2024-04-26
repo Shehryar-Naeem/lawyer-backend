@@ -200,16 +200,14 @@ const getGigs = async (
       Gig.find().populate({
         path: "user",
         select: "city avatar",
-      
-      }),        
+      }),
       req.query as any
     )
       .searchByFields()
       .filter()
       .pagination(resultPerPage);
 
-    const gigs = await apiFeature.query; 
-    
+    const gigs = await apiFeature.query;
 
     res.status(200).json({
       success: true,
@@ -222,9 +220,6 @@ const getGigs = async (
     next(error);
   }
 };
-
-
-
 
 // const getGigs = async (req: Request, res: Response, next: NextFunction) => {
 //   try {
@@ -265,8 +260,8 @@ const getGig = TryCatch(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const gig = await Gig.findById(req.params.id.toString())
-        .populate('user', '-password') // Populate the 'user' field, excluding password
-        .populate('lawyer'); // Populate the 'lawyer' field
+        .populate("user", "-password") // Populate the 'user' field, excluding password
+        .populate("lawyer"); // Populate the 'lawyer' field
 
       if (!gig) {
         return next(new ErrorHandler("Gig not found", 404));
@@ -285,7 +280,7 @@ const getGig = TryCatch(
 
 const getGigById = TryCatch(
   async (req: Request, res: Response, next: NextFunction) => {
-    const gig = await Gig.findById({ _id: req.params.id.toString()});
+    const gig = await Gig.findById({ _id: req.params.id.toString() });
 
     if (!gig) {
       return next(new ErrorHandler("Gig not found", 404));
@@ -298,15 +293,13 @@ const getGigById = TryCatch(
   }
 );
 
-
 const getUserGigs = TryCatch(
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     const userId = req.user?._id as string;
-    const gigs = await Gig.find({ user: userId }).populate('user', '-password') // Populate the 'user' field, excluding password
-    .populate('lawyer');
+    const gigs = await Gig.find({ user: userId })
+      .populate("user", "-password") // Populate the 'user' field, excluding password
+      .populate("lawyer");
 
-
-    
     if (!gigs) {
       return next(new ErrorHandler("Gigs not found", 404));
     }
@@ -317,17 +310,47 @@ const getUserGigs = TryCatch(
   }
 );
 
+// const updateGig = TryCatch(
+//   async (req: Request, res: Response, next: NextFunction) => {
+//     const gig = await Gig.findByIdAndUpdate(req.params.id as string, req.body, {
+//       new: true,
+//       runValidators: true,
+//       useFindAndModify: false,
+//     });
+//     if (!gig) {
+//       return next(new ErrorHandler("Gig not found", 404));
+//     }
+//     res.status(200).json({
+//       success: true,
+//       gig,
+//     });
+//   }
+// );
+
 const updateGig = TryCatch(
   async (req: Request, res: Response, next: NextFunction) => {
-    
-    const gig = await Gig.findByIdAndUpdate(req.params.id as string, req.body, {
-      new: true,
-      runValidators: true,
-      useFindAndModify: false,
+    const gig = await Gig.findById({
+      _id: req.params.id.toString(),
     });
+
     if (!gig) {
       return next(new ErrorHandler("Gig not found", 404));
     }
+
+    const { title, category, description } = req.body;
+
+    if (title) {
+      gig.title = title;
+    }
+    if (category) {
+      gig.category = category;
+    }
+    if (description) {
+      gig.description = description;
+    }
+
+    await gig.save();
+
     res.status(200).json({
       success: true,
       gig,
@@ -337,9 +360,14 @@ const updateGig = TryCatch(
 
 const deleteGig = TryCatch(
   async (req: Request, res: Response, next: NextFunction) => {
-    const gig = await Gig.findByIdAndDelete(req.params.id, {
-      useFindAndModify: false,
-    });
+    const gig = await Gig.findByIdAndDelete(
+      {
+        _id: req.params.id.toString(),
+      },
+      {
+        useFindAndModify: false,
+      }
+    );
     if (!gig) {
       return next(new ErrorHandler("Gig not found", 404));
     }
