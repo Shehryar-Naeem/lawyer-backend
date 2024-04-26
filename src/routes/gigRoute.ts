@@ -31,7 +31,7 @@ router
 router
   .route("/get-gig/:id")
   .get(isAuthenticatedUser, getGig);
-router.route("/get-gig-by-id/:id").get(isAuthenticatedUser, authorizeToLawyer,getGigById);
+router.route("/get-gig-detail/:id").get(isAuthenticatedUser, authorizeToLawyer,getGigById);
 router.route("/get-gigs/me").get(isAuthenticatedUser, authorizeToLawyer, getUserGigs);
 router.route("/get-gigs").get(getGigs);
 
