@@ -66,6 +66,7 @@ const createGigStep1 = TryCatch(
     res.status(201).json({
       success: true,
       gig,
+      
     });
   }
 );

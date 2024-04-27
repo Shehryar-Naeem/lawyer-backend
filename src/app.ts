@@ -5,7 +5,9 @@ import dotenv from "dotenv";
 import userRouter from "./routes/userRoute.js";
 import lawyerRouter from "./routes/lawyerRoute.js";
 import gigRouter from "./routes/gigRoute.js";
+import conversationRoute from "./routes/conversation.js"
 import clientCaseRouter from "./routes/clientPostRoute.js";
+import messageRoute from "./routes/messageRoute.js"
 import cors from "cors";
 import { Server } from "socket.io";
 import { app, server } from "./socket/socket.js";
@@ -13,6 +15,7 @@ import { errorMiddlerware } from "./middleware/error.js";
 import bodyParser from "body-parser";
 import fileUpload from "express-fileupload";
 import cloudinary from "cloudinary";
+
 // require("dotenv").config();
 // process.on("uncaughtException", (err) => {
 //   console.log(`Error: ${err.message}`);
@@ -43,6 +46,8 @@ app.use("/api/user", userRouter);
 app.use("/api/lawyer", lawyerRouter);
 app.use("/api/gig", gigRouter);
 app.use("/api/client-post", clientCaseRouter);
+app.use("/api/conversation", conversationRoute);
+app.use("/api/message",messageRoute)
 io.on("connection", (socket) => {
   console.log("a user connected");
 });
