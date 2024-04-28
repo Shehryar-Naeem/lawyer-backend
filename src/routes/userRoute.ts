@@ -24,7 +24,7 @@ router.route("/login-or-register").post(CreateUser);
 router.route("/login-user").post(loginUser);
 router.route("/passwor/forget").post(forgetPassword);
 router.route("/password/reset/:token").put(restPassword);
-router.route("/logout").post(isAuthenticatedUser, logout);
+router.route("/logout").get(isAuthenticatedUser, logout);
 router.route("/update-profile-pic").put(isAuthenticatedUser, updateProfilePicture);
 router.route("/get-profile").get(isAuthenticatedUser, getProfleData);
 router.route("/update-user-password").put(isAuthenticatedUser, updatePasswrord);
