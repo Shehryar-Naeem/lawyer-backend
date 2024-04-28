@@ -26,6 +26,7 @@ const createConversation = TryCatch(
       return res.status(200).json({
         success: true,
         message: "Conversation already exists",
+        conversation : findConversation
       });
     }
     const receiverUser = await User.findOne({ _id: receiverId });
@@ -51,6 +52,8 @@ const createConversation = TryCatch(
 
     return res.status(201).json({
       success: true,
+      message: "Conversation created",
+      conversation: newConversation,
     });
   }
 );
