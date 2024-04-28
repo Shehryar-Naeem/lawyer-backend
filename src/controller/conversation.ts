@@ -26,7 +26,7 @@ const createConversation = TryCatch(
       return res.status(200).json({
         success: true,
         message: "Conversation already exists",
-        conversation : findConversation
+        conversation: findConversation,
       });
     }
     const receiverUser = await User.findOne({ _id: receiverId });
@@ -62,13 +62,16 @@ const getMeConversations = TryCatch(
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     const userId = req?.user?._id.toString();
     const conversations = await Conversation.find({
-      "participants.senderId": userId,
-    }).populate(
-      "participants.receiverId",
-      "name avatar"
-    );
+      $or: [
+        {  "participants.senderId": userId},
+        {  "participants.receiverId": userId, }
+      ]
+      // "participants.senderId": userId,
 
-    return res.status(200).json({
+    }).populate("participants.receiverId", "name avatar");
+  
+    
+    res.status(200).json({
       success: true,
       conversations,
     });
@@ -90,6 +93,6 @@ const deleteConversation = TryCatch(
       success: true,
     });
   }
-);  
+);
 
-export { createConversation,getMeConversations ,deleteConversation };
+export { createConversation, getMeConversations, deleteConversation };
