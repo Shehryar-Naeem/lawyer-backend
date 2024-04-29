@@ -48,7 +48,7 @@ const createGigStep1 = TryCatch(
       return next(new ErrorHandler("Please enter all fields", 400));
     }
     const userCity = req.user?.city;
-    if (userCity===null) {
+    if (userCity === null) {
       return next(new ErrorHandler("Please update your profile first", 400));
     }
     const appentGitTitle = `${title}`;
@@ -66,7 +66,6 @@ const createGigStep1 = TryCatch(
     res.status(201).json({
       success: true,
       gig,
-      
     });
   }
 );
@@ -382,6 +381,127 @@ const deleteGig = TryCatch(
   }
 );
 
+const addReview = TryCatch(
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    const { rating, comment } = req.body;
+
+    const gig: any = await Gig.findById(req.params.id);
+
+    if (!gig) {
+      return next(new ErrorHandler("Gig not found", 404));
+    }
+    if (gig.user.toString() !== req.user?._id.toString()) {
+      return next(new ErrorHandler("You can't review this gig", 401));
+    }
+    const alreadyReviewed = gig.reviews.find(
+      (r: any) => r.user.toString() === req.user?._id.toString()
+    );
+    if (alreadyReviewed) {
+      gig.reviews.forEach((review: any) => {
+        if (review.user.toString() === req.user?._id.toString()) {
+          review.rating = rating;
+          review.comment = comment;
+        }
+      });
+    } else {
+      const review: any = {
+        rating: Number(rating),
+        comment,
+        user: req.user?._id,
+      };
+      gig.reviews.push(review);
+      gig.numOfReviews = gig.reviews.length;
+    }
+
+    let avg = 0;
+    gig.reviews.forEach((review: any) => {
+      avg += review.rating;
+    });
+
+    gig.ratings = avg / gig.reviews.length;
+
+    await gig.save({ validateBeforeSave: false });
+
+    // if (alreadyReviewed) {
+    //   return next(new ErrorHandler("You have already reviewed this gig", 400));
+    // }
+
+    // const review:any= {
+    //   rating: Number(rating),
+    //   comment,
+    //   user: req.user?._id,
+    // };
+
+    // gig.reviews.push(review);
+
+    // gig.numOfReviews = gig.reviews.length;
+
+    // gig.ratings =
+    //   gig.reviews.reduce((acc:any, item:any) => item.rating + acc, 0) /
+    //   gig.reviews.length;
+
+    // await gig.save({ validateBeforeSave: false });
+
+    res.status(200).json({
+      success: true,
+      message: "Review added successfully",
+    });
+  }
+);
+
+const getGigReviews = TryCatch(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const gig = await Gig.findById(req.params.id).populate(
+      "reviews.user",
+      "name avatar"
+    );
+
+    if (!gig) {
+      return next(new ErrorHandler("Gig not found", 404));
+    }
+
+    res.status(200).json({
+      success: true,
+      reviews: gig.reviews,
+    });
+  }
+);
+
+const deleteGigReview = TryCatch(
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    const gig :any = await Gig
+      .findById(req.params.id);
+    if (!gig) {
+      return next(new ErrorHandler("Gig not found", 404));
+    }
+
+    const reviews:any = gig.reviews.filter(
+      (review: any) => review._id.toString() !== req.params.reviewId.toString()
+    );
+
+    const numOfReviews = reviews.length;
+
+    let ratings = 0;
+  
+    reviews.forEach((review: any) => {
+      ratings += review.rating;
+    });
+
+    gig.reviews = reviews;
+    
+    gig.numOfReviews = numOfReviews;
+    gig.ratings = ratings / reviews.length;
+
+    await gig.save({ validateBeforeSave: false });
+
+    res.status(200).json({
+      success: true,
+    });
+  } 
+);
+
+
+
 export {
   createGigStep1,
   createGigStep2,
@@ -392,4 +512,7 @@ export {
   updateGig,
   getUserGigs,
   getGigById,
+  addReview,
+  getGigReviews,
+  deleteGigReview,
 };
