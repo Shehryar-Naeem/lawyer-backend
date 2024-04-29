@@ -10,7 +10,7 @@ import clientCaseRouter from "./routes/clientPostRoute.js";
 import messageRoute from "./routes/messageRoute.js"
 import cors from "cors";
 import { Server } from "socket.io";
-import { app, server } from "./socket/socket.js";
+import { app, server ,io} from "./socket/socket.js";
 import { errorMiddlerware } from "./middleware/error.js";
 import bodyParser from "body-parser";
 import fileUpload from "express-fileupload";
@@ -30,7 +30,7 @@ cloudinary.v2.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 
 });
-const io = new Server(server);
+
 app.use(cors());
 app.use(cookieParser());
 app.use(bodyParser.json({ limit: "50mb" }));
@@ -42,15 +42,14 @@ app.use(express.json());
 const db = process.env.db as string;
 connectDb(db);
 
+app.set("io", io);
 app.use("/api/user", userRouter);
 app.use("/api/lawyer", lawyerRouter);
 app.use("/api/gig", gigRouter);
 app.use("/api/client-post", clientCaseRouter);
 app.use("/api/conversation", conversationRoute);
 app.use("/api/message",messageRoute)
-io.on("connection", (socket) => {
-  console.log("a user connected");
-});
+
 const port = process.env.PORT || 4000;
 
 app.use(errorMiddlerware);

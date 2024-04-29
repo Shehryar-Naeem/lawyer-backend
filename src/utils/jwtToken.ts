@@ -26,5 +26,24 @@ const sendToken = (
     redirectUrl 
   });
 };
+// export const getSockets = (users = []) => {
+//   const sockets = users.map((user) => userSocketIDs.get(user.toString()));
 
+//   return sockets;
+// };
+
+// const emitEvent = (req:any, event:any, users:any, data:any) => {
+//   const io = req.app.get("io");
+//   const usersSocket = getSockets(users);
+//   io.to(usersSocket).emit(event, data);
+// };
+
+export const  getOtherUserId = (conversation:any, userId:any) => {
+  return conversation.participants.senderId.toString() === userId.toString()
+    ? conversation.participants.receiverId
+    : conversation.participants.senderId;
+};
 export default sendToken;
+
+
+
