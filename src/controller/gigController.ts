@@ -264,7 +264,8 @@ const getGig = TryCatch(
     try {
       const gig = await Gig.findById(req.params.id.toString())
         .populate("user", "-password") // Populate the 'user' field, excluding password
-        .populate("lawyer"); // Populate the 'lawyer' field
+        .populate("lawyer") // Populate the 'lawyer' field
+        .populate("reviews.user", "name avatar");
 
       if (!gig) {
         return next(new ErrorHandler("Gig not found", 404));
