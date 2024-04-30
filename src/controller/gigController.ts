@@ -390,8 +390,8 @@ const addReview = TryCatch(
     if (!gig) {
       return next(new ErrorHandler("Gig not found", 404));
     }
-    if (gig.user.toString() !== req.user?._id.toString()) {
-      return next(new ErrorHandler("You can't review this gig", 401));
+    if (gig.user.toString() === req.user?._id.toString()) {
+      return next(new ErrorHandler("You can't review this gig", 400));
     }
     const alreadyReviewed = gig.reviews.find(
       (r: any) => r.user.toString() === req.user?._id.toString()
