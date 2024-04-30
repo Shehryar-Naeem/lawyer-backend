@@ -214,7 +214,7 @@ const getGigs = async (
 
     res.status(200).json({
       success: true,
-      gigs,
+      gigs:gigs.reverse(),
       resultPerPage,
       gigsCount,
       filterGigCount: gigs.length,
@@ -309,7 +309,7 @@ const getUserGigs = TryCatch(
     }
     res.status(200).json({
       success: true,
-      gigs,
+      gigs:gigs.reverse(),
     });
   }
 );
@@ -463,7 +463,7 @@ const getGigReviews = TryCatch(
 
     res.status(200).json({
       success: true,
-      reviews: gig.reviews,
+      reviews: gig.reviews.reverse(),
     });
   }
 );
