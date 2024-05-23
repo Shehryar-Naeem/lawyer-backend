@@ -39,7 +39,7 @@ const userSchema = new mongoose.Schema<IUser>(
           "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRKaiKiPcLJj7ufrj6M2KaPwyCT4lDSFA5oog&usqp=CAU",
       },
     },
-    yourSelf: {
+    cnic: {
       type: String,
       default: null,
       // required: [true, "Please Enter Your Self Description"],
@@ -77,39 +77,39 @@ const userSchema = new mongoose.Schema<IUser>(
   }
 );
 
-userSchema.pre("save", async function (next) {
-  // const clientId = new mongoose.Types.ObjectId();
-  // const lawyerId = new mongoose.Types.ObjectId();
+// userSchema.pre("save", async function (next) {
+//   // const clientId = new mongoose.Types.ObjectId();
+//   // const lawyerId = new mongoose.Types.ObjectId();
 
-  const hasClientRole = this.roles.some((role) => role.roleType === "client");
-  // const hasLawyerRole = this.roles.some((role) => role.roleType === "lawyer");
+//   const hasClientRole = this.roles.some((role) => role.roleType === "client");
+//   // const hasLawyerRole = this.roles.some((role) => role.roleType === "lawyer");
 
-  if (!hasClientRole) {
-    const clientId = new mongoose.Types.ObjectId();
-    this.roles.push({ _id: clientId, roleType: "client" });
-    const client = new Client({ _id: clientId, user: this._id });
-    await client.save();
-  }
+//   if (!hasClientRole) {
+//     const clientId = new mongoose.Types.ObjectId();
+//     this.roles.push({ _id: clientId, roleType: "client" });
+//     const client = new Client({ _id: clientId, user: this._id });
+//     await client.save();
+//   }
 
-  // if (!hasLawyerRole) {
-  //   const lawyerId = new mongoose.Types.ObjectId();
-  //   this.roles.push({ _id: lawyerId, roleType: "lawyer" });
-  //   const lawyer = new Lawyer({ _id: lawyerId, user: this._id });
-  //   await lawyer.save();
-  // }
+//   // if (!hasLawyerRole) {
+//   //   const lawyerId = new mongoose.Types.ObjectId();
+//   //   this.roles.push({ _id: lawyerId, roleType: "lawyer" });
+//   //   const lawyer = new Lawyer({ _id: lawyerId, user: this._id });
+//   //   await lawyer.save();
+//   // }
 
-  // Add both client and lawyer roles to the user
-  // this.roles.push({ _id: clientId, roleType: "client" });
-  // this.roles.push({ _id: lawyerId, roleType: "lawyer" });
+//   // Add both client and lawyer roles to the user
+//   // this.roles.push({ _id: clientId, roleType: "client" });
+//   // this.roles.push({ _id: lawyerId, roleType: "lawyer" });
 
-  // const client = new Client({ _id: clientId, user: this._id });
-  // const lawyer = new Laywer({ _id: lawyerId, user: this._id });
+//   // const client = new Client({ _id: clientId, user: this._id });
+//   // const lawyer = new Laywer({ _id: lawyerId, user: this._id });
 
-  // Save both client and lawyer records
-  // Promise.all([client.save(), lawyer.save()])
-  //   .then(() => next())
-  //   .catch((err) => next(err));
-});
+//   // Save both client and lawyer records
+//   // Promise.all([client.save(), lawyer.save()])
+//   //   .then(() => next())
+//   //   .catch((err) => next(err));
+// });
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) {
     next();

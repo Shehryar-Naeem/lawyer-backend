@@ -5,7 +5,7 @@ import { ErrorHandler } from "../utils/utility-class.js";
 import cloudinary from "cloudinary";
 import Conversation from "../models/conversation/conversation.js";
 import { getOtherUserId } from "../utils/jwtToken.js";
-import { getRecipientSocketId, io } from "../socket/socket.js";
+import { getRecipientSocketId, io, userConversationMap } from "../socket/socket.js";
 
 
 const sendMessage = async (
@@ -54,15 +54,20 @@ const sendMessage = async (
   };
 
   const receiverSocketId = getRecipientSocketId(receiverId.toString());
+  const receiverInConversation = userConversationMap[receiverId.toString()] === conversationId.toString();
+
+  
   if (receiverSocketId) {
     io.to(receiverSocketId).emit("newMessage", {
       message: messageForRealTime,
       conversationId: conversationId.toString(),
     });
 
-    io.to(receiverSocketId).emit("newMessageNotification", {
-      conversationId: conversationId.toString(),
-    });
+    if (!receiverInConversation) {
+      io.to(receiverSocketId).emit("newMessageNotification", {
+        conversationId: conversationId.toString()
+      });
+    }
   }
 
   const newMessage = new Message({
@@ -91,6 +96,7 @@ const sendMessage = async (
     conversationId: conversationId.toString(),
   });
 };
+
 
 const getSingleConversationMessages = async (
   req: AuthenticatedRequest,

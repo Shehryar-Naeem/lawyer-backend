@@ -21,8 +21,10 @@ export class ApiFeatures<T> {
   public query: any;
   private queryStr: any;
 
-  constructor(query: Query<T[], T>, queryStr: any) {
-    this.query = query;
+    constructor(query: Query<T[], T>, queryStr: any) {
+    this.query = query.sort({
+      createdAt: -1,
+    });
     this.queryStr = queryStr;
   }
 
@@ -44,7 +46,7 @@ export class ApiFeatures<T> {
   //   const queryCopy = { ...this.queryStr };
   //   const removeFields = ["keyword", "page", "limit"];
   //   removeFields.forEach((key) => delete queryCopy[key]);
-    
+
   //   // Check if the city field exists
   //   if (this.queryStr.city) {
   //     this.query = this.query.populate({
@@ -52,7 +54,7 @@ export class ApiFeatures<T> {
   //       match: { city: this.queryStr.city }
   //     });
   //   }
-  
+
   //   // Convert remaining filters to a Mongoose filter query
   //   const filterQuery:any = {};
   //   for (const key in queryCopy) {
@@ -60,58 +62,33 @@ export class ApiFeatures<T> {
   //       filterQuery[key] = queryCopy[key];
   //     }
   //   }
-  
+
   //   // Apply remaining filters directly to the Mongoose query object
   //   this.query = this.query.find(filterQuery);
-  
+
   //   return this;
   // }
-  
-
 
   filter(): ApiFeatures<T> {
     const queryCopy = { ...this.queryStr };
     const removeFields = ["keyword", "page", "limit"];
     removeFields.forEach((key) => delete queryCopy[key]);
-  
-    
-   
-  
+
     // Convert remaining filters to a Mongoose filter query
     let queryStr = JSON.stringify(queryCopy);
     queryStr = queryStr.replace(/\b(gt|gte|lt|lte)\b/g, (key) => `$${key}`);
     let filterQuery = JSON.parse(queryStr) as FilterQuery<T>;
-  
+
     // Apply remaining filters directly to the Mongoose query object
     this.query = this.query.find(filterQuery);
-  
-  
-  
+
     return this;
   }
-  
 
-  
-  
-
-  
-  
-  
-  
-  
-
-
-  
-  
-  
   pagination(resultPerPage: number): ApiFeatures<T> {
-
     const currentPage = Number(this.queryStr.page) || 1;
     const skip = resultPerPage * (currentPage - 1);
-    
-    
-    
-    
+
     this.query = this.query.limit(resultPerPage).skip(skip);
     return this;
   }

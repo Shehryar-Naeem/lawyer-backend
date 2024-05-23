@@ -21,7 +21,7 @@ export interface IUser {
   postalCode?: number;
   resetPasswordToken: string | undefined;
   resetPasswordExpire: Date | undefined;
-  yourSelf?: string;
+  cnic: string;
   roles: IRoles[];
   gender: "male" | "female";
   getJWTToken: () => string;
@@ -44,7 +44,8 @@ export interface ILawyer {
     };
     experience: string;
   };
-
+  cnicPicture: any;
+  lawyerIdCard: any;
   isVerified: boolean;
   availability: {
     // officeHours: string;

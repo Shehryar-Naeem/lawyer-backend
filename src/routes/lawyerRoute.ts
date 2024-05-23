@@ -27,15 +27,13 @@ router
   .route("/get-lawyer/admin/:id")
   .get(isAuthenticatedUser, authorizeToAdmin, singalLawyer);
 router
-  .route("/verify-lawyer/:id")
+  .route("/verify-lawyer/admin/:id")
   .put(isAuthenticatedUser, authorizeToAdmin, verifytheLawyer);
 router
-  .route("/get-lawyers")
+  .route("/get-lawyers/admin")
   .get(isAuthenticatedUser, authorizeToAdmin, getAllLawyers);
 router
   .route("/delete-lawyer/admin/:id")
   .delete(isAuthenticatedUser, authorizeToAdmin, deleteLawyer);
-
-
 
 export default router;

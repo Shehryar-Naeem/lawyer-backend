@@ -5,12 +5,14 @@ import dotenv from "dotenv";
 import userRouter from "./routes/userRoute.js";
 import lawyerRouter from "./routes/lawyerRoute.js";
 import gigRouter from "./routes/gigRoute.js";
-import conversationRoute from "./routes/conversation.js"
+import conversationRoute from "./routes/conversation.js";
 import clientCaseRouter from "./routes/clientPostRoute.js";
-import messageRoute from "./routes/messageRoute.js"
+import messageRoute from "./routes/messageRoute.js";
+import bidRouter from "./routes/bidRoute.js";
+import verificationRouter from "./routes/verificationRoute.js";
 import cors from "cors";
 import { Server } from "socket.io";
-import { app, server ,io} from "./socket/socket.js";
+import { app, server, io } from "./socket/socket.js";
 import { errorMiddlerware } from "./middleware/error.js";
 import bodyParser from "body-parser";
 import fileUpload from "express-fileupload";
@@ -28,7 +30,6 @@ cloudinary.v2.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
-
 });
 
 app.use(cors());
@@ -46,16 +47,17 @@ app.set("io", io);
 app.use("/api/user", userRouter);
 app.use("/api/lawyer", lawyerRouter);
 app.use("/api/gig", gigRouter);
-app.use("/api/client-post", clientCaseRouter);
+app.use("/api/job", clientCaseRouter);
 app.use("/api/conversation", conversationRoute);
-app.use("/api/message",messageRoute)
+app.use("/api/message", messageRoute);
+app.use("/api/bid", bidRouter);
+app.use("/api/verification", verificationRouter);
 
 const port = process.env.PORT || 4000;
 
 app.use(errorMiddlerware);
 
 server.listen(port, () => {
-  
   console.log(`Server is running ${port}`);
 });
 

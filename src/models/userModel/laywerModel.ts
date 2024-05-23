@@ -26,6 +26,28 @@ const LawyerSchema = new mongoose.Schema<ILawyer>(
       },
     },
 
+    cnicPicture: {
+      public_id: {
+        type: String,
+        default: null,
+      },
+      url: {
+        type: String,
+        default: null,
+      },
+    },
+
+    lawyerIdCard: {
+      public_id: {
+        type: String,
+        default: null,
+      },
+      url: {
+        type: String,
+        default: null,
+      },
+    },
+
     professionalInfo: {
       lawFirmName: {
         type: String,
@@ -69,10 +91,10 @@ const LawyerSchema = new mongoose.Schema<ILawyer>(
         type: String,
         default: null,
       },
-      degreeName:{
+      degreeName: {
         type: String,
         default: null,
-      }
+      },
     },
     numOfReviews: {
       type: Number,

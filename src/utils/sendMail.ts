@@ -18,4 +18,27 @@ const sendMail = async (email: string, subject: string, text: string) => {
   };
   await transporter.sendMail(mailOptions);
 };
+
+
+export const sendMailToAdmin = async (email: string, subject: string, text: string) => {
+  const transporter = modeMailer.createTransport({
+    service: "gmail",
+    host: "smtp.gmail.com",
+    port: 587,
+    auth: {
+      user: process.env.EMAIL,
+      pass: process.env.PASSWORD,
+    },
+  });
+  const mailOptions = {
+    from: email,
+    to: process.env.EMAIL,
+    subject: subject,
+    text: text,
+  };
+  await transporter.sendMail(mailOptions);
+}
+
 export default sendMail;
+
+

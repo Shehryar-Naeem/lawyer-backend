@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 const clientCaseSchema = new mongoose.Schema(
   {
-    client: { type: mongoose.Schema.Types.ObjectId, ref: "Client" },
+    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     title: {
       type: String,
       required: true,
@@ -14,10 +14,7 @@ const clientCaseSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    duration: {
-      type: String,
-      required: true,
-    },
+
     // documents: [
     //   {
     //     public_id: {
@@ -31,20 +28,50 @@ const clientCaseSchema = new mongoose.Schema(
     //     },
     //   },
     // ],
-    expertise: [
-      {
-        type: String,
-        required: false,
-      },
-    ],
+
+    category: {
+      type: String,
+      required: false,
+    },
+
+    experience: {
+      type: String,
+      required: false,
+    },
 
     status: {
       type: String,
       enum: ["looking", "hired", "completed"],
       default: "looking",
     },
-    locationPreference: {
+    isStopRecievingRequest: {
+      type: Boolean,
+      default: false,
+    },
+    location: {
       type: String,
+      required: false,
+    },
+    majorIssues: [
+      {
+        type: String,
+        required: false,
+      },
+    ],
+    hiredLawyer: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: false,
+    },
+    hiredBid: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Bid",
+      required: false,
+    },
+    clientStatus: {
+      type: String,
+      enum: ["completed"],
+      default: null,
       required: false,
     },
   },

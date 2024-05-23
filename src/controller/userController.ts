@@ -15,6 +15,11 @@ import sendToken from "../utils/jwtToken.js";
 import crypto from "crypto";
 import cloudinary from "cloudinary";
 import { Gig } from "../models/GigsModel/gigModel.js";
+import mongoose from "mongoose";
+import { Lawyer } from "../models/userModel/laywerModel.js";
+import { Client } from "../models/userModel/clientModel.js";
+import ClientCase from "../models/clientCase/ClientCaseModel.js";
+import LawyerVerificationRequest from "../models/LawyerVerfiicationRequest/index.js";
 
 const CreateUser = TryCatch(
   async (
@@ -30,6 +35,24 @@ const CreateUser = TryCatch(
       password,
     });
 
+
+    const hasClientRole = newUser.roles.some(
+      (role: any) => role.roleType === "client"
+    );
+    // const hasLawyerRole = this.roles.some((role) => role.roleType === "lawyer");
+
+    
+
+    if (!hasClientRole) {
+      console.log("called");
+      
+      const clientId = new mongoose.Types.ObjectId();
+      newUser.roles.push({ _id: clientId, roleType: "client" });
+      newUser.save();
+      const client = new Client({ _id: clientId, user: newUser._id });
+
+      await client.save();
+    }
     const msg: string = "user Register Successfully";
 
     sendToken(newUser as CombinedType, 201, res, msg);
@@ -171,7 +194,7 @@ const getProfleData = TryCatch(
       user.email === null ||
       user.name === null ||
       user.city == null ||
-      user.yourSelf === null ||
+      user.cnic === null ||
       user.gender === null ||
       user.postalCode === null
     ) {
@@ -214,16 +237,14 @@ const updateProfile = TryCatch(
         const user: any = req.user?._id;
 
         const userGigs: any = await Gig.find({ user: user.toString() });
-        
+
         if (userGigs.length > 0) {
           userGigs.map(async (gig: any) => {
             gig.city = updatedFields.city;
             await gig.save();
           });
         }
-        
-        
-        
+
         updatedFields.city = updatedFields.city.toLowerCase();
       }
 
@@ -255,6 +276,57 @@ const updateProfilePicture = TryCatch(
     const userId = req.user?._id;
     try {
       let user = await User.findById(userId);
+
+      if (!user) {
+        return next(new ErrorHandler("User not found", 404));
+      }
+
+      if (req.body.avatar !== "") {
+        const imageId = user?.avatar?.public_id;
+
+        // If the user already has a profile picture, delete it from Cloudinary
+        if (imageId) {
+          await cloudinary.v2.uploader.destroy(imageId);
+        }
+
+        // Upload the new profile picture to Cloudinary
+        const uploadedImage = await cloudinary.v2.uploader.upload(
+          req.body.avatar,
+          {
+            folder: "avatars",
+            width: 150,
+            crop: "scale",
+          }
+        );
+
+        // Update the user's avatar information with the new Cloudinary data
+        user.avatar = {
+          public_id: uploadedImage.public_id,
+          url: uploadedImage.secure_url,
+        };
+
+        // Save the updated user information
+        user = await user.save();
+      }
+
+      res.status(200).json({
+        success: true,
+        message: "Profile picture updated successfully",
+        user,
+      });
+    } catch (error) {
+      return next(new ErrorHandler("Failed to update profile picture", 500));
+    }
+  }
+);
+
+const updateProfilePictureByAdmin = TryCatch(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req.params.id as string;
+    try {
+      let user = await User.findById({
+        _id: userId,
+      });
 
       if (!user) {
         return next(new ErrorHandler("User not found", 404));
@@ -388,24 +460,62 @@ const getAllUser = TryCatch(
 const updateProfileByadmin = TryCatch(
   async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id as string;
+    try {
+      let updatedFields = req.body;
+
+      // Convert email to lowercase if it exists in the request body
+      if (updatedFields.email) {
+        updatedFields.email = updatedFields.email.toLowerCase();
+      }
+      if (updatedFields.city) {
+        const user: any = req.params.id as string;
+
+        const userGigs: any = await Gig.find({ user: user.toString() });
+
+        if (userGigs.length > 0) {
+          userGigs.map(async (gig: any) => {
+            gig.city = updatedFields.city;
+            await gig.save();
+          });
+        }
+
+        updatedFields.city = updatedFields.city.toLowerCase();
+      }
+
+      // Find the user by ID and update the fields
+      const updatedUser = await User.findByIdAndUpdate(id, updatedFields, {
+        new: true, // Return the updated document
+        runValidators: true, // Run validators to ensure data consistency
+      });
+
+      if (!updatedUser) {
+        return next(new ErrorHandler("User not found", 404));
+      }
+
+      res.status(200).json({
+        success: true,
+        message: "User updated successfully",
+        user: updatedUser,
+      });
+    } catch (error) {
+      // Handle errors, log, and/or return appropriate responses
+      console.error(error);
+      next(error);
+    }
+  }
+);
+const getUserProfileDetailByAdmin = TryCatch(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const id = req.params.id as string;
     const user = await User.findOne({ _id: id });
 
     if (!user) {
       return next(new ErrorHandler("User not found", 404));
     }
 
-    const updatedFields = req.body;
-
-    Object.keys(updatedFields).forEach((key) => {
-      // Use type assertion here if necessary
-      (user as any)[key] = updatedFields[key];
-    });
-
-    // Save the updated user
-    await user.save();
     res.status(200).json({
       success: true,
-      message: "User updated successfully",
+      message: "User profile",
       user,
     });
   }
@@ -414,12 +524,25 @@ const updateProfileByadmin = TryCatch(
 const deleteUserByAdmin = TryCatch(
   async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id as string;
-    const user = await User.findOne({ _id: id });
 
-    if (!user) {
+    const deleteUser = await User.findByIdAndDelete({
+      _id: id,
+    });
+
+    if (!deleteUser) {
       return next(new ErrorHandler("User not found", 404));
     }
-    await User.findByIdAndDelete(id);
+
+    const findClient = await Client.findOneAndDelete({ user: id });
+    // if (!findClient) {
+    //   return next(new ErrorHandler("Client not found", 404));
+    // }
+    const findLawyer = await Lawyer.findOneAndDelete({ user: id });
+
+    // if (!findLawyer) {
+    //   return next(new ErrorHandler("Lawyer not found", 404));
+    // }
+
     res.status(200).json({
       success: true,
       message: "User deleted successfully",
@@ -427,6 +550,322 @@ const deleteUserByAdmin = TryCatch(
   }
 );
 
+// const addNewRoleToUser = TryCatch(
+//   async (req: Request, res: Response, next: NextFunction) => {
+//     const id = req.params.id as string;
+//     const user: any = await User.findOne({ _id: id });
+
+//     if (!user) {
+//       return next(new ErrorHandler("User not found", 404));
+//     }
+
+//     const role = req.body.role;
+
+//     const hasAdminRole = user.roles.some(
+//       (role: any) => role.roleType === "admin"
+//     );
+
+//     if (hasAdminRole) {
+//       return next(new ErrorHandler("User is already an admin", 400));
+//     }
+
+//     if (!role) {
+//       return next(new ErrorHandler("Role not provided", 400));
+//     }
+//     const adminId = new mongoose.Types.ObjectId();
+
+//     user.roles.push({ _id: adminId, roleType: role });
+
+//     await user.save();
+
+//     res.status(200).json({
+//       success: true,
+//       message: "Role added successfully",
+//       user,
+//     });
+//   }
+// );
+
+// const removeAdminRole = TryCatch(
+//   async (req: Request, res: Response, next: NextFunction) => {
+//     const id = req.params.id as string;
+//     const user: any = await User.findOne({ _id: id });
+
+//     if (!user) {
+//       return next(new ErrorHandler("User not found", 404));
+//     }
+
+//     const adminRole = user.roles.find((role: any) => role.roleType === "admin");
+
+//     if (!adminRole) {
+//       return next(new ErrorHandler("User is not an admin", 400));
+//     }
+
+//     const adminIndex = user.roles.indexOf(adminRole);
+
+//     user.roles.splice(adminIndex, 1);
+
+//     await user.save();
+
+//     res.status(200).json({
+//       success: true,
+//       message: "Admin role removed successfully",
+//       user,
+//     });
+//   }
+// );
+
+const addNewRoleToUser = TryCatch(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const id = req.params.id as string;
+    const user: any = await User.findOne({ _id: id });
+
+    if (!user) {
+      return next(new ErrorHandler("User not found", 404));
+    }
+
+    const role = req.body.role;
+
+    if (!role) {
+      return next(new ErrorHandler("Role not provided", 400));
+    }
+
+    if (role === "client") {
+      const hasClientRole = user.roles.some(
+        (role: any) => role.roleType === "client"
+      );
+      if (hasClientRole) {
+        return next(new ErrorHandler("User is already a client", 400));
+      }
+      const clientId = new mongoose.Types.ObjectId();
+      user.roles.push({ _id: clientId, roleType: role });
+      await user.save();
+      const client = new Client({ _id: clientId, user: user?._id });
+      await client.save();
+    } else if (role === "lawyer") {
+      const hasLawyerRole = user.roles.some(
+        (role: any) => role.roleType === "lawyer"
+      );
+      if (hasLawyerRole) {
+        return next(new ErrorHandler("User is already a lawyer", 400));
+      }
+      const lawyerId = new mongoose.Types.ObjectId();
+      user.roles.push({ _id: lawyerId, roleType: role });
+      await user.save();
+      const lawyer = new Lawyer({ _id: lawyerId, user: user?._id });
+      await lawyer.save();
+    } else if (role === "admin") {
+      const hasAdminRole = user.roles.some(
+        (role: any) => role.roleType === "admin"
+      );
+      if (hasAdminRole) {
+        return next(new ErrorHandler("User is already an admin", 400));
+      }
+      const adminId = new mongoose.Types.ObjectId();
+      user.roles.push({ _id: adminId, roleType: role });
+      await user.save();
+    }
+    res.status(200).json({
+      success: true,
+      message: "Role added successfully",
+      user,
+    });
+  }
+);
+
+const removeAdminRole = TryCatch(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const id = req.params.id as string;
+    const user: any = await User.findOne({ _id: id });
+
+    if (!user) {
+      return next(new ErrorHandler("User not found", 404));
+    }
+
+    if (user.roles.length === 1) {
+      return next(new ErrorHandler("User must have at least one role", 400));
+    }
+
+    const role = req.body.role;
+
+    if (!role) {
+      return next(new ErrorHandler("Role not provided", 400));
+    }
+
+    if (role === "client") {
+      const clientRole = user.roles.find(
+        (role: any) => role.roleType === "client"
+      );
+      if (!clientRole) {
+        return next(new ErrorHandler("User is not a client", 400));
+      }
+      const clientIndex = user.roles.indexOf(clientRole);
+      user.roles.splice(clientIndex, 1);
+      await user.save();
+      await Client.findOneAndDelete({ user: user._id });
+
+      const lawyerRole = user.roles.find(
+        (role: any) => role.roleType === "lawyer"
+      );
+      if (!lawyerRole) {
+        return next(new ErrorHandler("User is not a lawyer", 400));
+      }
+      const lawyerIndex = user.roles.indexOf(lawyerRole);
+      user.roles.splice(lawyerIndex, 1);
+      await user.save();
+      await Lawyer.findOneAndDelete({ user: user._id });
+      await User.findOneAndDelete({ _id: id });
+    } else if (role === "lawyer") {
+      const lawyerRole = user.roles.find(
+        (role: any) => role.roleType === "lawyer"
+      );
+      if (!lawyerRole) {
+        return next(new ErrorHandler("User is not a lawyer", 400));
+      }
+      const lawyerIndex = user.roles.indexOf(lawyerRole);
+      user.roles.splice(lawyerIndex, 1);
+      await user.save();
+      await Lawyer.findOneAndDelete({ user: user._id });
+    } else if (role === "admin") {
+      const adminRole = user.roles.find(
+        (role: any) => role.roleType === "admin"
+      );
+
+      if (!adminRole) {
+        return next(new ErrorHandler("User is not an admin", 400));
+      }
+
+      const adminIndex = user.roles.indexOf(adminRole);
+
+      user.roles.splice(adminIndex, 1);
+
+      await user.save();
+    }
+    res.status(200).json({
+      success: true,
+      message: "Role removed successfully",
+      user,
+    });
+  }
+);
+
+const getAllUserWhoRoleIsAdmin = TryCatch(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const users = await User.find({
+      roles: { $elemMatch: { roleType: "admin" } },
+    });
+    res.status(200).json({
+      success: true,
+      message: "All User",
+      users,
+    });
+  }
+);
+
+const removeRoletoOurProfile = TryCatch(
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    const userId = req?.user?._id as string;
+    const role = req.body.role;
+
+    const user = await User.findById({
+      _id: userId,
+    });
+
+    if (!user) {
+      return next(new ErrorHandler("User not found", 404));
+    }
+
+    if (!role) {
+      return next(new ErrorHandler("Role not provided", 400));
+    }
+
+    if (role === "client") {
+      const clientRole = user.roles.find(
+        (role: any) => role.roleType === "client"
+      );
+
+      if (clientRole) {
+        const clientIndex = user.roles.indexOf(clientRole);
+
+        user.roles.splice(clientIndex, 1);
+
+        await user.save();
+        await Client.findOneAndDelete({ user: userId });
+      }
+
+      const lawyerRole = user.roles.find(
+        (role: any) => role.roleType === "lawyer"
+      );
+      console.log(lawyerRole);
+
+      if (lawyerRole) {
+        const lawyerIndex = user.roles.indexOf(lawyerRole);
+        console.log("lawyerIndex", lawyerIndex);
+
+        user.roles.splice(lawyerIndex, 1);
+        await user.save();
+        await Lawyer.findOneAndDelete({ user: userId });
+        console.log("called");
+      }
+
+      await User.findOneAndDelete({ _id: userId });
+    } else if (role === "lawyer") {
+      const lawyerRole = user.roles.find(
+        (role: any) => role.roleType === "lawyer"
+      );
+      if (!lawyerRole) {
+        return next(new ErrorHandler("User is not a lawyer", 400));
+      }
+      const lawyerIndex = user.roles.indexOf(lawyerRole);
+      user.roles.splice(lawyerIndex, 1);
+      await user.save();
+      await Lawyer.findOneAndDelete({ user: userId });
+    } else if (role === "admin") {
+      const adminRole = user.roles.find(
+        (role: any) => role.roleType === "admin"
+      );
+
+      if (!adminRole) {
+        return next(new ErrorHandler("User is not an admin", 400));
+      }
+
+      const adminIndex = user.roles.indexOf(adminRole);
+
+      user.roles.splice(adminIndex, 1);
+
+      await user.save();
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Role removed successfully",
+      user,
+    });
+  }
+);
+const stats = TryCatch(
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    const totalUser = await User.countDocuments();
+    const totalLawyer = await Lawyer.countDocuments();
+    const totalClient = await Client.countDocuments();
+    const totalGig = await Gig.countDocuments();
+    const jobs = await ClientCase.countDocuments();
+    const totalVerificationRequest =
+      await LawyerVerificationRequest.countDocuments({
+        status: "pending",
+      });
+    res.status(200).json({
+      success: true,
+      message: "stats of website",
+      totalUser,
+      totalLawyer,
+      totalClient,
+      totalGig,
+      jobs,
+      totalVerificationRequest,
+    });
+  }
+);
 export {
   CreateUser,
   loginUser,
@@ -440,4 +879,11 @@ export {
   restPassword,
   updatePasswrord,
   updateProfilePicture,
+  addNewRoleToUser,
+  removeAdminRole,
+  getAllUserWhoRoleIsAdmin,
+  getUserProfileDetailByAdmin,
+  updateProfilePictureByAdmin,
+  removeRoletoOurProfile,
+  stats,
 };

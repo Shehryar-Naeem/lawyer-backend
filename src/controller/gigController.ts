@@ -9,6 +9,8 @@ import { Gig } from "../models/GigsModel/gigModel.js";
 import { AuthenticatedRequest, IGig } from "../types/types.js";
 import { Lawyer } from "../models/userModel/laywerModel.js";
 import cloudinary from "cloudinary";
+import { log } from "console";
+import { User } from "../models/userModel/userModel.js";
 
 // Define a type for the Gig document including pricing information
 
@@ -34,6 +36,9 @@ const createGigStep1 = TryCatch(
 
     if (!lawyerInstance) {
       return next(new ErrorHandler("Lawyer not found", 404));
+    }
+    if (lawyerInstance?.isVerified === false) {
+      return next(new ErrorHandler("Please verify your account first", 400));
     }
     if (
       lawyerInstance.gigs &&
@@ -124,6 +129,77 @@ const createGigStep2 = TryCatch(
   }
 );
 
+// const createGigStep3 = TryCatch(
+//   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+//     try {
+//       const userId = req.user?._id as string;
+//       const lawyer = req.user?.roles.find((role) => role.roleType === "lawyer");
+//       const lawyerId = lawyer?._id;
+
+//       if (!lawyerId) {
+//         return next(
+//           new ErrorHandler("You are not authorized to create a gig", 401)
+//         );
+//       }
+
+//       const gigId = req.params.id;
+//       const gig = await Gig.findOne({ _id: gigId });
+
+//       if (!gig) {
+//         return next(new ErrorHandler("Gig not found", 404));
+//       }
+
+//       if (gig.user.toString() !== userId.toString()) {
+//         return next(
+//           new ErrorHandler("You are not authorized to update this gig", 401)
+//         );
+//       }
+
+//       let avatars = [];
+//       const { images } = req.body;
+
+//       if (!images) {
+//         return next(new ErrorHandler("Please enter images", 400));
+//       }
+
+//       if (typeof images === "string") {
+//         avatars.push(images);
+//       } else {
+//         avatars = images;
+//       }
+
+//       for (let i = 0; i < gig.images.length; i++) {
+//         await cloudinary.v2.uploader.destroy(gig.images[i].public_id);
+//       }
+
+//       const imagesLinks = [];
+//       for (let i = 0; i < avatars.length; i++) {
+//         const result = await cloudinary.v2.uploader.upload(avatars[i], {
+//           folder: "gigs",
+//         });
+//         console.log(result.secure_url);
+
+//         imagesLinks.push({
+//           public_id: result.public_id,
+//           url: result.secure_url,
+//         });
+//       }
+
+//       if (gig) {
+//         gig.images = imagesLinks;
+//       }
+//       await gig.save();
+
+//       res.status(201).json({
+//         success: true,
+//         gig,
+//       });
+//     } catch (error) {
+//       next(error); // Pass the error to the error handling middleware
+//     }
+//   }
+// );
+
 const createGigStep3 = TryCatch(
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -190,16 +266,12 @@ const createGigStep3 = TryCatch(
   }
 );
 
-const getGigs = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
+const getGigs = TryCatch(
+  async (req: Request, res: Response, next: NextFunction) => {
     const resultPerPage: number = 2;
     const gigsCount: number = await Gig.countDocuments();
 
-    const apiFeature = new ApiFeatures<IGig>(
+    const apiFeature = new ApiFeatures(
       Gig.find().populate({
         path: "user",
         select: "city avatar",
@@ -214,15 +286,44 @@ const getGigs = async (
 
     res.status(200).json({
       success: true,
-      gigs:gigs.reverse(),
+      gigs: gigs,
       resultPerPage,
       gigsCount,
       filterGigCount: gigs.length,
     });
-  } catch (error) {
-    next(error);
   }
-};
+);
+
+// const getGigs = TryCatch(
+//   async (req: Request, res: Response, next: NextFunction) => {
+//     const resultPerPage: number = 2;
+
+//     const apiFeature = new ApiFeatures(
+//       Gig.find().populate({
+//         path: "user",
+//         select: "city avatar",
+//       }),
+//       req.query as any
+//     )
+//       .searchByFields()
+//       .filter()
+//       .pagination(resultPerPage);
+
+//       const gigsCount = await apiFeature.query.clone().countDocuments();
+
+//       const gigs = await apiFeature.query.exec();
+
+//     res.status(200).json({
+//       success: true,
+
+//       gigs: gigs.reverse(),
+//       resultPerPage,
+//       gigsCount,
+//       filterGigCount: gigs.length,
+
+//     });
+//   }
+// );
 
 // const getGigs = async (req: Request, res: Response, next: NextFunction) => {
 //   try {
@@ -309,7 +410,7 @@ const getUserGigs = TryCatch(
     }
     res.status(200).json({
       success: true,
-      gigs:gigs.reverse(),
+      gigs: gigs.reverse(),
     });
   }
 );
@@ -372,8 +473,21 @@ const deleteGig = TryCatch(
         useFindAndModify: false,
       }
     );
+
     if (!gig) {
       return next(new ErrorHandler("Gig not found", 404));
+    }
+
+    const lawyer: any = await Lawyer.findById({
+      _id: gig.lawyer.toString(),
+    });
+
+    if (lawyer) {
+      const gigs = lawyer.gigs.filter(
+        (gigId: any) => gigId.toString() !== req.params.id.toString()
+      );
+      lawyer.gigs = gigs;
+      await lawyer.save();
     }
     res.status(200).json({
       success: true,
@@ -452,10 +566,11 @@ const addReview = TryCatch(
 
 const getGigReviews = TryCatch(
   async (req: Request, res: Response, next: NextFunction) => {
-    const gig = await Gig.findById(req.params.id).populate(
-      "reviews.user",
-      "name avatar"
-    );
+    const gig = await Gig.findById({
+      _id: req.params.id.toString(),
+    })
+    .populate("reviews.user", "name avatar")
+    .exec();
 
     if (!gig) {
       return next(new ErrorHandler("Gig not found", 404));
@@ -470,26 +585,25 @@ const getGigReviews = TryCatch(
 
 const deleteGigReview = TryCatch(
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-    const gig :any = await Gig
-      .findById(req.params.id);
+    const gig: any = await Gig.findById(req.params.id);
     if (!gig) {
       return next(new ErrorHandler("Gig not found", 404));
     }
 
-    const reviews:any = gig.reviews.filter(
+    const reviews: any = gig.reviews.filter(
       (review: any) => review._id.toString() !== req.params.reviewId.toString()
     );
 
     const numOfReviews = reviews.length;
 
     let ratings = 0;
-  
+
     reviews.forEach((review: any) => {
       ratings += review.rating;
     });
 
     gig.reviews = reviews;
-    
+
     gig.numOfReviews = numOfReviews;
     gig.ratings = ratings / reviews.length;
 
@@ -498,10 +612,78 @@ const deleteGigReview = TryCatch(
     res.status(200).json({
       success: true,
     });
-  } 
+  }
 );
 
+const getAllGigs = TryCatch(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const gigs = await Gig.find();
 
+    res.status(200).json({
+      success: true,
+      gigs,
+    });
+  }
+);
+
+const updateGigByAdmin = TryCatch(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const gig = await Gig.findById({
+      _id: req.params.id.toString(),
+    });
+
+    if (!gig) {
+      return next(new ErrorHandler("Gig not found", 404));
+    }
+
+    const { title, category, description, services, price, images } = req.body;
+
+    if (title) {
+      gig.title = title;
+    }
+    if (category) {
+      gig.category = category;
+    }
+    if (description) {
+      gig.description = description;
+    }
+    if (services) {
+      gig.pricing.services = services;
+    }
+    if (price) {
+      gig.pricing.price = price;
+    }
+    if (images !== null || images !== undefined || images.length > 0) {
+      let avatars = [];
+
+      if (typeof images === "string") {
+        avatars.push(images);
+      } else {
+        avatars = images;
+      }
+      const imagesLinks = [];
+
+      for (let i = 0; i < avatars.length; i++) {
+        const result = await cloudinary.v2.uploader.upload(avatars[i], {
+          folder: "gigs",
+        });
+
+        imagesLinks.push({
+          public_id: result.public_id,
+          url: result.secure_url,
+        });
+      }
+
+      gig.images = imagesLinks;
+    }
+    await gig.save();
+
+    res.status(200).json({
+      success: true,
+      gig,
+    });
+  }
+);
 
 export {
   createGigStep1,
@@ -516,4 +698,6 @@ export {
   addReview,
   getGigReviews,
   deleteGigReview,
+  getAllGigs,
+  updateGigByAdmin,
 };

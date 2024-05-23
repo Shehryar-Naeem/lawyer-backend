@@ -10,25 +10,14 @@ const server = http.createServer(app);
 const io = new Server(server, {
   pingTimeout: 60000,
   cors: {
-    origin:  "https://lawyer-market.vercel.app",
+    origin: ["http://localhost:3000"],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   },
 });
-// const io = new Server(server, {
-//   pingTimeout: 60000,
-//   cors: {
-//     origin:[
-//       "http://localhost:3000",
-//       "http://localhost:3001",
-//       "https://lawyer-market.vercel.app",
-
-//     ],
-//     methods: ["GET", "POST", "PUT", "DELETE"],
-//     credentials: true,
-//   },
-// });
 const userSocketMap: any = {}; // userId: socketId
+export const userConversationMap: any = {};
+
 
 export const getRecipientSocketId = (recipientId: string) => {
   return userSocketMap[recipientId];
@@ -46,6 +35,13 @@ io.on("connection", (socket) => {
     io.emit("getOnlineUsers", Object.keys(userSocketMap));
   }
 
+  socket.on("joinConversation", ({ conversationId, userId }) => {
+    userConversationMap[userId] = conversationId;
+  });
+
+  socket.on("leaveConversation", ({ userId }) => {
+    delete userConversationMap[userId];
+  });
   socket.on("markMessagesAsSeen", async ({ conversationId, userId }) => {
     try {
       await Message.updateMany(
@@ -66,6 +62,7 @@ io.on("connection", (socket) => {
     if (userId && userSocketMap[userId]) {
       // Remove the user's socket ID from the map
       delete userSocketMap[userId];
+      delete userConversationMap[userId];
 
       // Emit the updated list of online users to all clients
       io.emit("getOnlineUsers", Object.keys(userSocketMap));

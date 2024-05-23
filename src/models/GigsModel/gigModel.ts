@@ -15,12 +15,12 @@ const pricingAndServiceSchema = new mongoose.Schema({
   services: {
     type: [String],
     default: [],
-    index: true, 
+    index: true,
   },
   price: {
     type: Number,
     default: 0,
-    index: true, 
+    index: true,
   },
   additionalCost: {
     services: {
@@ -55,6 +55,7 @@ const gigsSchema = new mongoose.Schema(
       {
         public_id: {
           type: String,
+          required: true,
         },
         url: {
           type: String,
@@ -62,7 +63,6 @@ const gigsSchema = new mongoose.Schema(
         },
       },
     ],
-   
 
     category: {
       type: [String],
@@ -110,6 +110,6 @@ const gigsSchema = new mongoose.Schema(
   }
 );
 
-const Gig: Model<IGig> = mongoose.model<IGig>('Gig', gigsSchema);
+const Gig: Model<IGig> = mongoose.model<IGig>("Gig", gigsSchema);
 
 export { Gig };
