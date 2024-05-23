@@ -206,7 +206,7 @@ const getPostWhoStatusIsHired = TryCatch(
 );
 const getAllJobs = TryCatch(
   async (req: Request, res: Response, next: NextFunction) => {
-    const resultPerPage: number = 2;
+    const resultPerPage: number = 10;
     const apiFeature = new ApiFeatures(
       ClientCase.find().populate("user", "name avatar"),
       req.query

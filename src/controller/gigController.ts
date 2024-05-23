@@ -268,7 +268,7 @@ const createGigStep3 = TryCatch(
 
 const getGigs = TryCatch(
   async (req: Request, res: Response, next: NextFunction) => {
-    const resultPerPage: number = 2;
+    const resultPerPage: number = 10;
     const gigsCount: number = await Gig.countDocuments();
 
     const apiFeature = new ApiFeatures(
