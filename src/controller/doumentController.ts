@@ -6,11 +6,12 @@ import ClientCase from "../models/clientCase/ClientCaseModel.js";
 import { uploadFileToCloudinary } from "../utils/jwtToken.js";
 import Document from "../models/documentModel/index.js";
 
+
 const uploadFile = TryCatch(
   async (req: any, res: Response, next: NextFunction) => {
     const files = req.files[0];
     console.log(files);
-    
+
     const userId = req.user._id as string;
     const postId = req.params.id as string;
 
@@ -41,4 +42,45 @@ const uploadFile = TryCatch(
   }
 );
 
-export { uploadFile };
+const getAllDocumentsRelatedToPost = TryCatch(
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    const postId = req.params.id as string;
+    const userId = req?.user?._id as string;
+
+    const findPost = await ClientCase.findOne({ _id: postId, user: userId });
+
+    if (!findPost) return next(new ErrorHandler("Post Not Found", 404));
+
+    const documents = await Document.find({ postId, sender: userId });
+
+    res.status(200).json({
+      success: true,
+      data: documents,
+    });
+  }
+);
+const deleteDocument = TryCatch(
+  async (req: any, res: Response, next: NextFunction) => {
+    const documentId = req.params.id as string;
+    const userId = req?.user?._id as string;
+
+    console.log(documentId, userId);
+    
+
+    const document = await Document.findOneAndDelete({
+      _id: documentId,
+      sender: userId.toString(),
+    });
+
+    console.log(document);
+
+    if (!document) return next(new ErrorHandler("Document Not Found", 404));
+
+    res.status(200).json({
+      success: true,
+      data: {},
+    });
+  }
+);
+
+export { uploadFile, getAllDocumentsRelatedToPost, deleteDocument };
