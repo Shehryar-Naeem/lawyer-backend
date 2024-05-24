@@ -30,7 +30,7 @@ const createGigStep1 = TryCatch(
       );
     }
 
-    const lawyerInstance = await Lawyer.findById(_id);
+    const lawyerInstance:any = await Lawyer.findById(_id);
 
     const totalUserGigs = await Gig.find({ user: userId });
 
@@ -57,7 +57,7 @@ const createGigStep1 = TryCatch(
       return next(new ErrorHandler("Please update your profile first", 400));
     }
     const appentGitTitle = `${title}`;
-    const gig = await Gig.create({
+    const gig: any = await Gig.create({
       title: appentGitTitle.toLowerCase(),
       category,
       description: description.toLowerCase(),
@@ -569,8 +569,8 @@ const getGigReviews = TryCatch(
     const gig = await Gig.findById({
       _id: req.params.id.toString(),
     })
-    .populate("reviews.user", "name avatar")
-    .exec();
+      .populate("reviews.user", "name avatar")
+      .exec();
 
     if (!gig) {
       return next(new ErrorHandler("Gig not found", 404));
