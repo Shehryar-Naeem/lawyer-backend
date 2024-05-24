@@ -10,6 +10,7 @@ import clientCaseRouter from "./routes/clientPostRoute.js";
 import messageRoute from "./routes/messageRoute.js";
 import bidRouter from "./routes/bidRoute.js";
 import verificationRouter from "./routes/verificationRoute.js";
+import documentRouter from "./routes/documentRoute.js"
 import cors from "cors";
 import { Server } from "socket.io";
 import { app, server, io } from "./socket/socket.js";
@@ -36,8 +37,8 @@ app.use(cors());
 app.use(cookieParser());
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
-app.use(fileUpload());
-
+app.use(express.urlencoded({ extended: true }));
+// app.use(fileUpload());
 app.use(express.json());
 
 const db = process.env.db as string;
@@ -52,7 +53,7 @@ app.use("/api/conversation", conversationRoute);
 app.use("/api/message", messageRoute);
 app.use("/api/bid", bidRouter);
 app.use("/api/verification", verificationRouter);
-
+app.use("/api/document", documentRouter);
 const port = process.env.PORT || 4000;
 
 app.use(errorMiddlerware);
