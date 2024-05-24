@@ -10,7 +10,7 @@ import clientCaseRouter from "./routes/clientPostRoute.js";
 import messageRoute from "./routes/messageRoute.js";
 import bidRouter from "./routes/bidRoute.js";
 import verificationRouter from "./routes/verificationRoute.js";
-import documentRouter from "./routes/documentRoute.js"
+// import documentRouter from "./routes/documentRoute.js"
 import cors from "cors";
 import { Server } from "socket.io";
 import { app, server, io } from "./socket/socket.js";
@@ -53,7 +53,7 @@ app.use("/api/conversation", conversationRoute);
 app.use("/api/message", messageRoute);
 app.use("/api/bid", bidRouter);
 app.use("/api/verification", verificationRouter);
-app.use("/api/document", documentRouter);
+// app.use("/api/document", documentRouter);
 const port = process.env.PORT || 4000;
 
 app.use(errorMiddlerware);
