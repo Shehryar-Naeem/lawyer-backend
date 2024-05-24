@@ -16,7 +16,7 @@ import { Server } from "socket.io";
 import { app, server, io } from "./socket/socket.js";
 import { errorMiddlerware } from "./middleware/error.js";
 import bodyParser from "body-parser";
-import fileUpload from "express-fileupload";
+// import fileUpload from "express-fileupload";
 import cloudinary from "cloudinary";
 
 // require("dotenv").config();
@@ -37,8 +37,8 @@ app.use(cors());
 app.use(cookieParser());
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
-app.use(express.urlencoded({ extended: true }));
-app.use(fileUpload());
+// app.use(express.urlencoded({ extended: true }));
+// app.use(fileUpload());
 app.use(express.json());
 
 const db = process.env.db as string;
