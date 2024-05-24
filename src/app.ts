@@ -16,7 +16,7 @@ import { Server } from "socket.io";
 import { app, server, io } from "./socket/socket.js";
 import { errorMiddlerware } from "./middleware/error.js";
 import bodyParser from "body-parser";
-import fileUpload from "express-fileupload";
+// import fileUpload from "express-fileupload";
 import cloudinary from "cloudinary";
 
 // require("dotenv").config();
