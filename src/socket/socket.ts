@@ -10,7 +10,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
   pingTimeout: 60000,
   cors: {
-    origin: ["https://lawyer-market.vercel.app/"],
+    origin: ["https://lawyer-market.vercel.app"],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   },
