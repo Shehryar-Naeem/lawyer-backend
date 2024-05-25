@@ -12,10 +12,12 @@ import {
   deleteGig,
   deleteGigReview,
   getAllGigs,
+  getAllGigsOfUser,
   getGig,
   getGigById,
   getGigReviews,
   getGigs,
+  getTopTenRatingGigs,
   getUserGigs,
   updateGig,
   updateGigByAdmin,
@@ -66,5 +68,6 @@ router
 router
   .route("/admin/delete-gig/:id")
   .delete(isAuthenticatedUser, authorizeToAdmin, deleteGig);
-
+router.route("/get/user-gigs/:id").get(isAuthenticatedUser, getAllGigsOfUser);
+router.route("/get/top-ten/gigs").get(getTopTenRatingGigs);
 export default router;

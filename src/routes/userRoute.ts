@@ -19,6 +19,7 @@ import {
   updateProfilePictureByAdmin,
   removeRoletoOurProfile,
   stats,
+  getUserData,
   // completeLawyerProfile,
 } from "../controller/userController.js";
 import {
@@ -70,6 +71,8 @@ router
   .route("/delete-user/admin/:id")
   .delete(isAuthenticatedUser, authorizeToAdmin, deleteUserByAdmin);
 router.route("/stats/admin").get(isAuthenticatedUser, authorizeToAdmin, stats);
+
+router.route("/get/user-data/:id").get(isAuthenticatedUser, getUserData);
 
 // // router.route("/save-profle").post(isAuthenticatedUser, completeLawyerProfile);
 // router

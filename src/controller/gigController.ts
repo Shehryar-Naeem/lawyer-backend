@@ -30,7 +30,7 @@ const createGigStep1 = TryCatch(
       );
     }
 
-    const lawyerInstance:any = await Lawyer.findById(_id);
+    const lawyerInstance: any = await Lawyer.findById(_id);
 
     const totalUserGigs = await Gig.find({ user: userId });
 
@@ -685,6 +685,88 @@ const updateGigByAdmin = TryCatch(
   }
 );
 
+const giveReviewToLawyerThataddinLawyerRelatedGigs = TryCatch(
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    const { rating, comment } = req.body;
+    const lawyerId = req.params.id;
+    const userId = req.user?._id;
+
+    const lawyer = await Lawyer.findById({
+      user: lawyerId,
+    });
+
+    if (!lawyer) {
+      return next(new ErrorHandler("Lawyer not found", 404));
+    }
+
+    const gigs = await Gig.find({ user: lawyerId });
+
+    if (!gigs) {
+      return next(new ErrorHandler("Gigs not found", 404));
+    }
+
+    const gigIds = gigs.map((gig) => gig._id);
+
+    const gigReviews = await Gig.find({
+      _id: { $in: gigIds },
+      "reviews.user": userId,
+    });
+
+    if (gigReviews.length > 0) {
+      return next(
+        new ErrorHandler("You have already reviewed this lawyer", 400)
+      );
+    }
+
+    const review = {
+      user: userId,
+      rating: Number(rating),
+      comment,
+    };
+
+    gigs.forEach(async (gig: any) => {
+      gig.reviews.push(review);
+      gig.numOfReviews = gig.reviews.length;
+      let total = 0;
+      gig.reviews.forEach((review: any) => {
+        total += review.rating;
+      });
+      gig.ratings = total / gig.reviews.length;
+      await gig.save();
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Review added successfully",
+    });
+  }
+);
+
+const getAllGigsOfUser = TryCatch(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req.params.id;
+    const gigs = await Gig.find({ user: userId }).populate("user");
+
+    if (!gigs) {
+      return next(new ErrorHandler("Gigs not found", 404));
+    }
+
+    res.status(200).json({
+      success: true,
+      gigs,
+    });
+  }
+);
+const getTopTenRatingGigs = TryCatch(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const gigs = await Gig.find().sort({ ratings: -1 }).limit(10);
+
+    res.status(200).json({
+      success: true,
+      gigs,
+    });
+  }
+);
 export {
   createGigStep1,
   createGigStep2,
@@ -700,4 +782,6 @@ export {
   deleteGigReview,
   getAllGigs,
   updateGigByAdmin,
+  getAllGigsOfUser,
+  getTopTenRatingGigs,
 };

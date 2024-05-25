@@ -35,17 +35,14 @@ const CreateUser = TryCatch(
       password,
     });
 
-
     const hasClientRole = newUser.roles.some(
       (role: any) => role.roleType === "client"
     );
     // const hasLawyerRole = this.roles.some((role) => role.roleType === "lawyer");
 
-    
-
     if (!hasClientRole) {
       console.log("called");
-      
+
       const clientId = new mongoose.Types.ObjectId();
       newUser.roles.push({ _id: clientId, roleType: "client" });
       newUser.save();
@@ -866,6 +863,26 @@ const stats = TryCatch(
     });
   }
 );
+
+const getUserData = TryCatch(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const id = req.params.id;
+
+    const user = await User.findById({
+      _id: id,
+    });
+
+    if (!user) {
+      return next(new ErrorHandler("User not found", 404));
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "User data",
+      user,
+    });
+  }
+);
 export {
   CreateUser,
   loginUser,
@@ -886,4 +903,5 @@ export {
   updateProfilePictureByAdmin,
   removeRoletoOurProfile,
   stats,
+  getUserData
 };
