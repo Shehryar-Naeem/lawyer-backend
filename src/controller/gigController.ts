@@ -759,7 +759,10 @@ const getAllGigsOfUser = TryCatch(
 );
 const getTopTenRatingGigs = TryCatch(
   async (req: Request, res: Response, next: NextFunction) => {
-    const gigs = await Gig.find().sort({ ratings: -1 }).limit(10);
+    const gigs = await Gig.find()
+      .populate("user")
+      .sort({ ratings: -1 })
+      .limit(10);
 
     res.status(200).json({
       success: true,

@@ -136,10 +136,7 @@ const deletePost = TryCatch(
 const getMePosts = TryCatch(
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     const user = req.user?._id;
-    const posts = await ClientCase.find({ user: user }).populate(
-      "user",
-      "name avatar"
-    );
+    const posts = await ClientCase.find({ user: user }).populate("user");
     res.status(200).json({
       success: true,
       data: posts,
@@ -150,10 +147,7 @@ const getMePosts = TryCatch(
 const getPost = TryCatch(
   async (req: Request, res: Response, next: NextFunction) => {
     const postId = req.params.id.toString();
-    const post = await ClientCase.findById({ _id: postId }).populate(
-      "user",
-      "name avatar"
-    );
+    const post = await ClientCase.findById({ _id: postId }).populate("user").populate("hiredLawyer");
     if (!post) {
       return next(new ErrorHandler("Post not found", 404));
     }
@@ -208,7 +202,7 @@ const getAllJobs = TryCatch(
   async (req: Request, res: Response, next: NextFunction) => {
     const resultPerPage: number = 10;
     const apiFeature = new ApiFeatures(
-      ClientCase.find().populate("user", "name avatar"),
+      ClientCase.find().populate("user", "name avatar city"),
       req.query
     )
       .searchByFields()

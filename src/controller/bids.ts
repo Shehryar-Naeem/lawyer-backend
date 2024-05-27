@@ -108,11 +108,16 @@ const acceptBid = TryCatch(
     }
 
     await Promise.all([bid.save(), post.save()]);
-    await sendMail(
-      bid?.lawyer?.email,
-      `Pak Law bid ${status}`,
-      `Your bid has been ${status} by ${req?.user?.name}`
-    );
+    try {
+      await sendMail(
+        bid?.lawyer?.email,
+        `Bid ${status}`,
+        `Your bid has been ${status} by the client`
+      );
+    } catch (error) {
+      console.log("error sending mail", error);
+    }
+
     res.status(200).json({
       success: true,
       message: "Bid accepted successfully",
@@ -127,8 +132,7 @@ const getMebids = TryCatch(
     const bids = await Bid.find({ lawyer: userId?.toString() })
       .populate("case")
       .populate("client");
-    
-      
+
     res.status(200).json({
       success: true,
       data: bids,

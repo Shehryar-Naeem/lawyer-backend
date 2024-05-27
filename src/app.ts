@@ -8,8 +8,10 @@ import gigRouter from "./routes/gigRoute.js";
 import conversationRoute from "./routes/conversation.js";
 import clientCaseRouter from "./routes/clientPostRoute.js";
 import messageRoute from "./routes/messageRoute.js";
+import documentRoute from "./routes/documentRoute.js";
 import bidRouter from "./routes/bidRoute.js";
 import verificationRouter from "./routes/verificationRoute.js";
+import customerSupport from "./routes/supportRoute.js";
 // import documentRouter from "./routes/documentRoute.js"
 import cors from "cors";
 import { Server } from "socket.io";
@@ -53,6 +55,8 @@ app.use("/api/conversation", conversationRoute);
 app.use("/api/message", messageRoute);
 app.use("/api/bid", bidRouter);
 app.use("/api/verification", verificationRouter);
+app.use("/api/document", documentRoute);
+app.use("/api/customer-support", customerSupport);
 // app.use("/api/document", documentRouter);
 const port = process.env.PORT || 4000;
 

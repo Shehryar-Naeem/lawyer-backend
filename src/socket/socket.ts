@@ -11,13 +11,13 @@ const io = new Server(server, {
   pingTimeout: 60000,
   cors: {
     origin: ["https://lawyer-market.vercel.app"],
+    // origin: ["http://localhost:3000"],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   },
 });
 const userSocketMap: any = {}; // userId: socketId
 export const userConversationMap: any = {};
-
 
 export const getRecipientSocketId = (recipientId: string) => {
   return userSocketMap[recipientId];

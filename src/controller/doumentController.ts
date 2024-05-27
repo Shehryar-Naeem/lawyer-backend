@@ -6,7 +6,6 @@ import ClientCase from "../models/clientCase/ClientCaseModel.js";
 import { uploadFileToCloudinary } from "../utils/jwtToken.js";
 import Document from "../models/documentModel/index.js";
 
-
 const uploadFile = TryCatch(
   async (req: any, res: Response, next: NextFunction) => {
     const files = req.files[0];
@@ -51,7 +50,10 @@ const getAllDocumentsRelatedToPost = TryCatch(
 
     if (!findPost) return next(new ErrorHandler("Post Not Found", 404));
 
-    const documents = await Document.find({ postId, sender: userId });
+    const documents = await Document.find({
+      postId: postId,
+      $or: [{ sender: userId }, { receiver: userId }],
+    });
 
     res.status(200).json({
       success: true,
@@ -65,7 +67,6 @@ const deleteDocument = TryCatch(
     const userId = req?.user?._id as string;
 
     console.log(documentId, userId);
-    
 
     const document = await Document.findOneAndDelete({
       _id: documentId,

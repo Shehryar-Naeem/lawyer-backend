@@ -18,9 +18,22 @@ const createConversation = TryCatch(
     if (senderId === receiverId) {
       return next(new ErrorHandler("You can't send message to yourself", 400));
     }
+    // const findConversation = await Conversation.findOne({
+    //   "participants.senderId": senderId,
+    //   "participants.receiverId": receiverId,
+    // });
+
     const findConversation = await Conversation.findOne({
-      "participants.senderId": senderId,
-      "participants.receiverId": receiverId,
+      $or: [
+        {
+          "participants.senderId": senderId,
+          "participants.receiverId": receiverId,
+        },
+        {
+          "participants.senderId": receiverId,
+          "participants.receiverId": senderId,
+        },
+      ],
     });
     if (findConversation) {
       return res.status(200).json({
@@ -62,24 +75,30 @@ const getMeConversations = TryCatch(
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     const userId = req?.user?._id.toString();
     console.log(userId);
-    
+
     const conversations = await Conversation.find({
       $or: [
-        {  "participants.senderId": userId},
-        {  "participants.receiverId": userId, }
-      ]
+        { "participants.senderId": userId },
+        { "participants.receiverId": userId },
+      ],
       // "participants.senderId": userId,
-
-    }).populate("participants.receiverId", "name avatar").populate("participants.senderId", "name avatar");
-
-    const transformedConversations = conversations.map(({participants,latestMessage,_id}) => {
-      const otherMember = participants?.receiverId?._id.toString() === userId ? participants?.senderId : participants?.receiverId;
-      return {
-        _id,
-        otherMember,
-        latestMessage,
-      };
     })
+      .populate("participants.receiverId", "name avatar")
+      .populate("participants.senderId", "name avatar");
+
+    const transformedConversations = conversations.map(
+      ({ participants, latestMessage, _id }) => {
+        const otherMember =
+          participants?.receiverId?._id.toString() === userId
+            ? participants?.senderId
+            : participants?.receiverId;
+        return {
+          _id,
+          otherMember,
+          latestMessage,
+        };
+      }
+    );
     res.status(200).json({
       success: true,
       conversations: transformedConversations,
@@ -108,13 +127,17 @@ const getSingleConversation = TryCatch(
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     const { id } = req.params;
 
-    const conversation = await Conversation.findById({_id: id})
+    const conversation = await Conversation.findById({ _id: id });
     return res.status(200).json({
       success: true,
       conversation,
     });
   }
-  
 );
 
-export { createConversation, getMeConversations, deleteConversation ,getSingleConversation};
+export {
+  createConversation,
+  getMeConversations,
+  deleteConversation,
+  getSingleConversation,
+};
