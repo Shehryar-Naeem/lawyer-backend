@@ -377,9 +377,8 @@ const forgetPassword = TryCatch(
     const resetToken = user.getResetPasswordToken();
     await user.save({ validateBeforeSave: false });
     const liveUrl = "https://lawyer-market.vercel.app/";
-    const resetUrl = `${
-      process.env.FRONTEND_URL || liveUrl
-    }user/resetpassword/${resetToken}`;
+    // const url = "http://localhost:3000/";
+    const resetUrl = `${liveUrl}user/resetpassword/${resetToken}`;
     const message = `Your password reset token is as follow:\n\n${resetUrl}\n\nIf you have not requested this email, then ignore it.`;
     try {
       await sendMail(user.email, "Password reset token", message);
@@ -903,5 +902,5 @@ export {
   updateProfilePictureByAdmin,
   removeRoletoOurProfile,
   stats,
-  getUserData
+  getUserData,
 };
