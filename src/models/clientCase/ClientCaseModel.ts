@@ -79,5 +79,5 @@ const clientCaseSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
-const ClientCase = mongoose.model("ClientCase", clientCaseSchema);
+const   ClientCase = mongoose.model("ClientCase", clientCaseSchema);
 export default ClientCase;

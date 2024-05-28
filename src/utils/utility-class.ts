@@ -21,7 +21,7 @@ export class ApiFeatures<T> {
   public query: any;
   private queryStr: any;
 
-    constructor(query: Query<T[], T>, queryStr: any) {
+  constructor(query: Query<T[], T>, queryStr: any) {
     this.query = query.sort({
       createdAt: -1,
     });

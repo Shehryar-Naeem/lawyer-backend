@@ -1,7 +1,8 @@
 import { Response } from "express";
 import { CombinedType } from "../types/types.js";
-import { v2 as cloudinary } from "cloudinary";
-import { v4 as uuid } from "uuid";
+import { v2 as cloudinary } from 'cloudinary';
+import { v4 as uuid } from 'uuid';
+import { Express } from 'express';
 
 const sendToken = (
   user: CombinedType,
@@ -52,22 +53,51 @@ export const getBase64 = (file: any) =>
 
 
 
-export const uploadFileToCloudinary = async (file: any) => {
+// export const uploadFileToCloudinary = async (file: any) => {
+//   return new Promise((resolve, reject) => {
+//     cloudinary.uploader.upload(
+//       getBase64(file),
+//       {
+//         folder: "lawyer-market_docuemnt",
+//         resource_type: "auto",
+//         public_id: uuid(),
+//       },
+//       (error, result:any) => {
+//         if (error) return reject(error);
+//         resolve({
+//           public_id: result.public_id,
+//           url: result.secure_url,
+//         });
+//       }
+//     );
+//   });
+// };
+
+
+
+export const uploadFileToCloudinary = (file: Express.Multer.File): Promise<{ public_id: string, url: string }> => {
   return new Promise((resolve, reject) => {
-    cloudinary.uploader.upload(
-      getBase64(file),
+    const uploadStream = cloudinary.uploader.upload_stream(
       {
+        folder: "lawyer-market_document",
         resource_type: "auto",
         public_id: uuid(),
       },
-      (error, result:any) => {
-        if (error) return reject(error);
+      (error, result) => {
+        if (error) {
+          console.error('Cloudinary upload error:', error); // Log error details
+          return reject(error);
+        }
+        if (!result) {
+          return reject(new Error('No result returned from Cloudinary'));
+        }
         resolve({
           public_id: result.public_id,
           url: result.secure_url,
         });
       }
     );
+
+    uploadStream.end(file.buffer);
   });
 };
-
