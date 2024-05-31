@@ -44,7 +44,6 @@ app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 app.use(express.json());
 
 const db = process.env.db as string;
-connectDb(db);
 
 app.set("io", io);
 app.use("/api/user", userRouter);
@@ -61,10 +60,17 @@ app.use("/api/customer-support", customerSupport);
 const port = process.env.PORT || 4000;
 
 app.use(errorMiddlerware);
-
-server.listen(port, () => {
-  console.log(`Server is running ${port}`);
-});
+connectDb(db)
+  .then(() => {
+    console.log("Database connected");
+    server.listen(port, () => {
+      console.log(`Server is running ${port}`);
+    });
+  })
+  .catch((err) => {
+    console.log(err);
+    process.exit(1);
+  });
 
 // process.on("unhandledRejection", (err:any) => {
 

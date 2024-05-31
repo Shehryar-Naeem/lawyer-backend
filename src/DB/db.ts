@@ -1,12 +1,13 @@
 import mongoose from "mongoose";
 
 const connectDb = async (url: string) => {
-  mongoose
-    .connect(url, {
-      dbName: "lawyer_marketplace",
-    })
-    .then((c) => console.log(`DB Connected to ${c.connection.host}`))
-    .catch((e) => console.log(e));
+  try {
+    const conn = await mongoose.connect(url);
+    console.log(`MongoDB Connected: ${conn.connection.host}`);
+  } catch (error: any) {
+    console.error(`Error: ${error.message}`);
+    process.exit(1);
+  }
 };
 
 export default connectDb;

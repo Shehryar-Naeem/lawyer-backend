@@ -8,6 +8,7 @@ import { Gig } from "../models/GigsModel/gigModel.js";
 import { Auth } from "firebase-admin/auth";
 import { Client } from "../models/userModel/clientModel.js";
 import Bid from "../models/bid/bidModel.js";
+import sendMail from "../utils/sendMail.js";
 const creatPost = TryCatch(
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     const user: any = req.user?._id;
@@ -147,7 +148,9 @@ const getMePosts = TryCatch(
 const getPost = TryCatch(
   async (req: Request, res: Response, next: NextFunction) => {
     const postId = req.params.id.toString();
-    const post = await ClientCase.findById({ _id: postId }).populate("user").populate("hiredLawyer");
+    const post = await ClientCase.findById({ _id: postId })
+      .populate("user")
+      .populate("hiredLawyer");
     if (!post) {
       return next(new ErrorHandler("Post not found", 404));
     }
@@ -333,7 +336,7 @@ const completeThePostStatus = TryCatch(
     const postId = req.params.id.toString();
     const userId = req.user?._id.toString();
 
-    const post = await ClientCase.findById({ _id: postId });
+    const post: any = await ClientCase.findById({ _id: postId });
     if (!post) {
       return next(new ErrorHandler("Post not found", 404));
     }
@@ -343,8 +346,25 @@ const completeThePostStatus = TryCatch(
       const bid: any = await Bid.findById({ _id: post.hiredBid });
       bid.status = "completed";
       await bid.save({ validateBeforeSave: false });
+      const postUser: any = await User.findById({ _id: post.user.toString() });
+
+      const userEamil = postUser.email;
+      await sendMail(
+        userEamil,
+        `Post Completed ${post.title}`,
+        `Your post ${post.title} has been completed with the lawyer ${req.user?.name}For more details please visit your dashboard`
+      );
     } else if (post.user.toString() === userId) {
       post.status = "completed";
+      const findLaywer: any = await User.findById({
+        _id: post.hiredLawyer.toString(),
+      });
+      const lawyerEmail = findLaywer.email;
+      await sendMail(
+        lawyerEmail,
+        `Post Completed ${post.title}`,
+        `The post ${post.title} has been completed with the client ${req.user?.name}For more details please visit your dashboard`
+      );
     }
     await post.save({ validateBeforeSave: false });
     res.status(200).json({
