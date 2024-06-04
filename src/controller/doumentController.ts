@@ -8,53 +8,146 @@ import Document from "../models/documentModel/index.js";
 
 import { v2 as cloudinary } from "cloudinary";
 
+// const uploadFile = TryCatch(
+//   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+//     const files = req.files as any;
+//     console.log(files);
+
+//     const userId = req?.user?._id as string;
+//     const postId = req.params.id as string;
+
+//     // if (files.length < 1)
+//     //   return next(new ErrorHandler("Please Upload Attachments", 400));
+
+//     // if (files.length > 5)
+//     //   return next(new ErrorHandler("Files Can't be more than 5", 400));
+
+//     const findPost = await ClientCase.findOne({ _id: postId });
+
+//     const findOtheId =
+//       findPost?.user.toString() === userId
+//         ? findPost?.hiredLawyer?.toString()
+//         : findPost?.user.toString();
+
+//     if (!findPost) return next(new ErrorHandler("Post Not Found", 404));
+//     // const attachments = await uploadFileToCloudinary(files);
+//     // const attachments = await cloudinary.uploader.upload(req.body.files, {
+//     //   folder: "documents",
+
+//     // });
+
+//     // console.log(attachments);
+
+//     const uploadDocument = await Document.create({
+//       postId,
+//       file: req.files,
+//       sender: userId,
+//       receiver: findOtheId,
+//     });
+
+//     // const uploadDocument = await Document.create({
+//     //   postId,
+//     //   file: {
+//     //     public_id: attachments.public_id,
+//     //     url: attachments.secure_url,
+//     //   },
+//     //   sender: userId,
+//     //   receiver: findOtheId,
+//     // });
+
+//     res.status(200).json({
+//       success: true,
+//       data: uploadDocument,
+//     });
+
+//   }
+// );
+
+
+// const uploadFile = TryCatch(
+//   async (req: any, res: Response, next: NextFunction) => {
+//     const files = req.body.files as any;
+//     console.log(files);
+
+//     const userId = req.user._id as string;
+//     const postId = req.params.id as string;
+
+//     // if (files.length < 1)
+//     //   return next(new ErrorHandler("Please Upload Attachments", 400));
+
+//     // if (files.length > 5)
+//     //   return next(new ErrorHandler("Files Can't be more than 5", 400));
+
+//     const findPost = await ClientCase.findOne({ _id: postId });
+
+//     const findOtheId =
+//       findPost?.user.toString() === userId
+//         ? findPost?.hiredLawyer?.toString()
+//         : findPost?.user.toString();
+
+//     if (!findPost) return next(new ErrorHandler("Post Not Found", 404));
+//     // const attachments = await uploadFileToCloudinary(files);
+//     const attachments = await cloudinary.uploader.upload(req.body.files, {
+//       folder: "documents",
+
+//     });
+
+//     console.log(attachments);
+
+//     const uploadDocument = await Document.create({
+//       postId,
+//       file: {
+//         public_id: attachments.public_id,
+//         url: attachments.secure_url,
+//       },
+//       sender: userId,
+//       receiver: findOtheId,
+//     });
+
+//     res.status(200).json({
+//       success: true,
+//       data: uploadDocument,
+//     });
+//   }
+// );
+
 const uploadFile = TryCatch(
-  async (req: any, res: Response, next: NextFunction) => {
-    const files = req.body.files as any;
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    const files = req.files as any;
     console.log(files);
+    
 
-    const userId = req.user._id as string;
+    const userId = req?.user?._id as string;
     const postId = req.params.id as string;
-
-    // if (files.length < 1)
-    //   return next(new ErrorHandler("Please Upload Attachments", 400));
-
-    // if (files.length > 5)
-    //   return next(new ErrorHandler("Files Can't be more than 5", 400));
 
     const findPost = await ClientCase.findOne({ _id: postId });
 
-    const findOtheId =
+    const findOtherId =
       findPost?.user.toString() === userId
         ? findPost?.hiredLawyer?.toString()
         : findPost?.user.toString();
 
     if (!findPost) return next(new ErrorHandler("Post Not Found", 404));
-    // const attachments = await uploadFileToCloudinary(files);
-    const attachments = await cloudinary.uploader.upload(req.body.files, {
-      folder: "documents",
-   
-    });
 
-    console.log(attachments);
+    // Create an array to store file URLs
+    const fileURL = files[0].path;
+    console.log(fileURL);
+    
 
-    const uploadDocument = await Document.create({
+    // Create a new document entry in the database
+    const uploadDocuments = await Document.create({
       postId,
-      file: {
-        public_id: attachments.public_id,
-        url: attachments.secure_url,
-      },
+      file: fileURL, // Store file URLs in the "files" field
       sender: userId,
-      receiver: findOtheId,
+      receiver: findOtherId,
     });
 
     res.status(200).json({
       success: true,
-      data: uploadDocument,
+      data: uploadDocuments,
     });
   }
 );
-
 const getAllDocumentsRelatedToPost = TryCatch(
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     const postId = req.params.id as string;

@@ -12,6 +12,7 @@ import documentRoute from "./routes/documentRoute.js";
 import bidRouter from "./routes/bidRoute.js";
 import verificationRouter from "./routes/verificationRoute.js";
 import customerSupport from "./routes/supportRoute.js";
+import hiringRouter from "./routes/hiringRoute.js";
 // import documentRouter from "./routes/documentRoute.js"
 import cors from "cors";
 import { Server } from "socket.io";
@@ -56,6 +57,8 @@ app.use("/api/bid", bidRouter);
 app.use("/api/verification", verificationRouter);
 app.use("/api/document", documentRoute);
 app.use("/api/customer-support", customerSupport);
+
+app.use("/api/hiring", hiringRouter);
 // app.use("/api/document", documentRouter);
 const port = process.env.PORT || 4000;
 

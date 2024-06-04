@@ -47,7 +47,7 @@ io.on("connection", (socket) => {
       await Message.updateMany(
         { conversationId: conversationId, seen: false },
         { $set: { seen: true } }
-      );
+      );  
       await Conversation.updateOne(
         { _id: conversationId },
         { $set: { "latestMessage.seen": true } }

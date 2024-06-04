@@ -7,14 +7,17 @@ const documentSchema = new mongoose.Schema({
     ref: "ClientCase",
   },
   file: {
-    public_id: {
-      type: String,
-      required: true,
-    },
-    url: {
-      type: String,
-      required: true,
-    },
+    // public_id: {
+    //   type: String,
+    //   required: true,
+    // },
+    // url: {
+    //   type: String,
+    //   required: true,
+    // },
+
+    type: String,
+    required: true,
   },
   sender: {
     type: mongoose.Schema.ObjectId,

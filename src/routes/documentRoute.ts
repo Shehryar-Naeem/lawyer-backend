@@ -10,12 +10,12 @@ import { isAuthenticatedUser } from "../middleware/authUser.js";
 
 const router = express.Router();
 
-router
-  .route("/upload-document/:id")
-  .post(isAuthenticatedUser, uploadFile);
 // router
 //   .route("/upload-document/:id")
-//   .post(isAuthenticatedUser, attachmentsMulter, uploadFile);
+//   .post(isAuthenticatedUser, uploadFile);
+router
+  .route("/upload-document/:id")
+  .post(isAuthenticatedUser, attachmentsMulter, uploadFile);
 
 router
   .route("/get/all/post-document/:id")

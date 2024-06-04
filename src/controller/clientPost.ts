@@ -9,6 +9,7 @@ import { Auth } from "firebase-admin/auth";
 import { Client } from "../models/userModel/clientModel.js";
 import Bid from "../models/bid/bidModel.js";
 import sendMail from "../utils/sendMail.js";
+import Hiring from "../models/hiringModel/index.js";
 const creatPost = TryCatch(
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     const user: any = req.user?._id;
@@ -314,15 +315,25 @@ const getPostStatusToAllowReviewToClient = TryCatch(
     if (!findGig) {
       return next(new ErrorHandler("Gig not found", 404));
     }
-    const findPost = await ClientCase.findOne({
-      user: userId,
-      hiredLawyer: findGig.user,
+    const hiring = await Hiring.findOne({
+      client: userId?.toString(),
+      lawyer: findGig.user,
     });
-
     const postStatus =
-      findPost?.status === "completed" && findPost.clientStatus === "completed"
+      hiring?.status === "completed" &&
+      hiring.client_mark_as_completed &&
+      hiring.lawyer_mark_as_completed
         ? true
         : false;
+    // const findPost = await ClientCase.findOne({
+    //   user: userId,
+    //   hiredLawyer: findGig.user,
+    // });
+
+    // const postStatus =
+    //   findPost?.status === "completed" && findPost.clientStatus === "completed"
+    //     ? true
+    //     : false;
 
     res.status(200).json({
       success: true,

@@ -43,7 +43,7 @@ router.route("/update-user-password").put(isAuthenticatedUser, updatePasswrord);
 router.route("/update-login-detail").put(isAuthenticatedUser, updateProfile);
 router
   .route("/add-new-role/:id")
-  .put(isAuthenticatedUser, authorizeToAdmin, addNewRoleToUser);
+  .put(isAuthenticatedUser,addNewRoleToUser);
 router
   .route("/remove-role/:id")
   .put(isAuthenticatedUser, authorizeToAdmin, removeAdminRole);
@@ -56,7 +56,7 @@ router
   .get(isAuthenticatedUser, authorizeToAdmin, getAllUser);
 
 router
-  .route("/get-user/admin/:id")
+  .route("/get-user/admin/:id") 
   .get(isAuthenticatedUser, authorizeToAdmin, getUserProfileDetailByAdmin);
 router
   .route("/update-user/admin/:id")
