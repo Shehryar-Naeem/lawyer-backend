@@ -63,11 +63,15 @@ const sendProposal = TryCatch(
       pricing,
     });
     await bid.save();
-    await sendMail(
-      findPost?.user?.email,
-      `New Proposal ${req?.user?.name}`,
-      `new proposal comes from ${req?.user?.name}`
-    );
+    try {
+      await sendMail(
+        findPost?.user?.email,
+        `New Proposal ${req?.user?.name}`,
+        `new proposal comes from ${req?.user?.name}`
+      );
+    } catch (error) {
+      return next(new ErrorHandler("Error sending mail", 500));
+    }
     res.status(200).json({
       success: true,
       message: "Proposal sent successfully",
@@ -84,10 +88,12 @@ const acceptBid = TryCatch(
     const bid: any = await Bid.findOne({
       _id: bidId.toString(),
       client: userId?.toString(),
-    });
+    }).populate("lawyer");
     if (!bid) {
       return next(new ErrorHandler("Bid not found", 404));
     }
+    console.log("bid", bid);
+
     const post = await ClientCase.findById({
       _id: bid.case.toString(),
     });
@@ -112,10 +118,10 @@ const acceptBid = TryCatch(
       await sendMail(
         bid?.lawyer?.email,
         `Bid ${status}`,
-        `Your bid has been ${status} by the client`
+        `Your bid has been ${status} by the client ${req?.user?.name}`
       );
     } catch (error) {
-      console.log("error sending mail", error);
+      return next(new ErrorHandler("Error sending mail", 500)); 
     }
 
     res.status(200).json({

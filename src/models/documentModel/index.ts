@@ -6,18 +6,25 @@ const documentSchema = new mongoose.Schema({
     type: mongoose.Schema.ObjectId,
     ref: "ClientCase",
   },
+  gigId: {
+    type: mongoose.Schema.ObjectId,
+    ref: "Gig",
+  },
+  hiring: {
+    type: mongoose.Schema.ObjectId,
+    ref: "Hiring",
+  },
   file: {
-    // public_id: {
-    //   type: String,
-    //   required: true,
-    // },
-    // url: {
-    //   type: String,
-    //   required: true,
-    // },
-
-    type: String,
-    required: true,
+    public_id: {
+      type: String,
+      required: true,
+    },
+    url: {
+      type: String,
+      required: true,
+    },
+    // type: String,
+    // required: true,
   },
   sender: {
     type: mongoose.Schema.ObjectId,

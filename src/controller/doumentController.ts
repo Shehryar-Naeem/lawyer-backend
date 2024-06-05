@@ -7,62 +7,62 @@ import { uploadFileToCloudinary } from "../utils/jwtToken.js";
 import Document from "../models/documentModel/index.js";
 
 import { v2 as cloudinary } from "cloudinary";
+import { Gig } from "../models/GigsModel/gigModel.js";
 
-// const uploadFile = TryCatch(
-//   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-//     const files = req.files as any;
-//     console.log(files);
+const uploadFile = TryCatch(
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    const files = req.files as any;
+    console.log(files);
 
-//     const userId = req?.user?._id as string;
-//     const postId = req.params.id as string;
+    const userId = req?.user?._id as string;
+    const postId = req.params.id as string;
 
-//     // if (files.length < 1)
-//     //   return next(new ErrorHandler("Please Upload Attachments", 400));
+    // if (files.length < 1)
+    //   return next(new ErrorHandler("Please Upload Attachments", 400));
 
-//     // if (files.length > 5)
-//     //   return next(new ErrorHandler("Files Can't be more than 5", 400));
+    // if (files.length > 5)
+    //   return next(new ErrorHandler("Files Can't be more than 5", 400));
 
-//     const findPost = await ClientCase.findOne({ _id: postId });
+    const findPost = await ClientCase.findOne({ _id: postId });
 
-//     const findOtheId =
-//       findPost?.user.toString() === userId
-//         ? findPost?.hiredLawyer?.toString()
-//         : findPost?.user.toString();
+    const findOtheId =
+      findPost?.user.toString() === userId
+        ? findPost?.hiredLawyer?.toString()
+        : findPost?.user.toString();
 
-//     if (!findPost) return next(new ErrorHandler("Post Not Found", 404));
-//     // const attachments = await uploadFileToCloudinary(files);
-//     // const attachments = await cloudinary.uploader.upload(req.body.files, {
-//     //   folder: "documents",
+    if (!findPost) return next(new ErrorHandler("Post Not Found", 404));
+    const attachments:any = await uploadFileToCloudinary(files);
+    // const attachments = await cloudinary.uploader.upload(req.body.files, {
+    //   folder: "documents",
 
-//     // });
+    // });
 
-//     // console.log(attachments);
+    // console.log(attachments);
 
-//     const uploadDocument = await Document.create({
-//       postId,
-//       file: req.files,
-//       sender: userId,
-//       receiver: findOtheId,
-//     });
+    // const uploadDocument = await Document.create({
+    //   postId,
+    //   file: req.files,
+    //   sender: userId,
+    //   receiver: findOtheId,
+    // });
 
-//     // const uploadDocument = await Document.create({
-//     //   postId,
-//     //   file: {
-//     //     public_id: attachments.public_id,
-//     //     url: attachments.secure_url,
-//     //   },
-//     //   sender: userId,
-//     //   receiver: findOtheId,
-//     // });
+    const uploadDocument = await Document.create({
+      postId,
+      file: {
+        public_id: attachments.public_id,
+        url: attachments.secure_url,
+      },
+      sender: userId,
+      receiver: findOtheId,
+    });
 
-//     res.status(200).json({
-//       success: true,
-//       data: uploadDocument,
-//     });
+    res.status(200).json({
+      success: true,
+      data: uploadDocument,
+    });
 
-//   }
-// );
-
+  }
+);
 
 // const uploadFile = TryCatch(
 //   async (req: any, res: Response, next: NextFunction) => {
@@ -111,43 +111,73 @@ import { v2 as cloudinary } from "cloudinary";
 //   }
 // );
 
-const uploadFile = TryCatch(
-  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-    const files = req.files as any;
-    console.log(files);
-    
+// const uploadFile = TryCatch(
+//   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+//     const files = req.files as any;
+//     console.log(files);
 
-    const userId = req?.user?._id as string;
-    const postId = req.params.id as string;
+//     const userId = req?.user?._id as string;
+//     const postId: any = req.params.id as string;
+//     const { type } = req.body;
 
-    const findPost = await ClientCase.findOne({ _id: postId });
+//     const hiringI = await Hiring.findById({
+//       _id: postId.toString(),
+//     });
 
-    const findOtherId =
-      findPost?.user.toString() === userId
-        ? findPost?.hiredLawyer?.toString()
-        : findPost?.user.toString();
+//     if (type === "job") {
+//       const findPost = await ClientCase.findOne({ _id: postId });
 
-    if (!findPost) return next(new ErrorHandler("Post Not Found", 404));
+//       const findOtherId =
+//         findPost?.user.toString() === userId
+//           ? findPost?.hiredLawyer?.toString()
+//           : findPost?.user.toString();
 
-    // Create an array to store file URLs
-    const fileURL = files[0].path;
-    console.log(fileURL);
-    
+//       if (!findPost) return next(new ErrorHandler("Post Not Found", 404));
 
-    // Create a new document entry in the database
-    const uploadDocuments = await Document.create({
-      postId,
-      file: fileURL, // Store file URLs in the "files" field
-      sender: userId,
-      receiver: findOtherId,
-    });
+//       // Create an array to store file URLs
+//       const fileURL = files[0].path;
+//       console.log(fileURL);
 
-    res.status(200).json({
-      success: true,
-      data: uploadDocuments,
-    });
-  }
-);
+//       // Create a new document entry in the database
+//       const uploadDocuments = await Document.create({
+//         postId,
+//         file: fileURL, // Store file URLs in the "files" field
+//         sender: userId,
+//         receiver: findOtherId,
+//       });
+
+//       res.status(200).json({
+//         success: true,
+//         data: uploadDocuments,
+//       });
+//     } else if (type === "gig") {
+//       const findPost = await Gig.findOne({ _id: postId });
+
+//       const findOtherId =
+//         findPost?.user.toString() === userId
+//           ? findPost?.lawyer?.toString()
+//           : findPost?.user.toString();
+
+//       if (!findPost) return next(new ErrorHandler("Post Not Found", 404));
+
+//       // Create an array to store file URLs
+//       const fileURL = files[0].path;
+
+//       // Create a new document entry in the database
+//       const uploadDocuments = await Document.create({
+//         gigId: postId,
+//         file: fileURL, // Store file URLs in the "files" field
+//         sender: userId,
+//         receiver: findOtherId,
+//       });
+
+//       res.status(200).json({
+//         success: true,
+//         data: uploadDocuments,
+//       });
+//     }
+//   }
+// );
 const getAllDocumentsRelatedToPost = TryCatch(
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     const postId = req.params.id as string;

@@ -43,7 +43,7 @@ const createGigStep1 = TryCatch(
     if (
       lawyerInstance.gigs &&
       // lawyerInstance.gigs.length >= 2 &&
-      totalUserGigs.length >= 2
+      totalUserGigs.length >= 5
     ) {
       return next(new ErrorHandler("You can only create up to two gigs", 400));
     }
@@ -104,6 +104,9 @@ const createGigStep2 = TryCatch(
 
     if (!services || !price) {
       return next(new ErrorHandler("Please enter all fields", 400));
+    }
+    if(price >1){
+      return next(new ErrorHandler("Price should be positive",400 ))
     }
     if (services.length < 1) {
       return next(new ErrorHandler("Please enter at least one service", 400));
