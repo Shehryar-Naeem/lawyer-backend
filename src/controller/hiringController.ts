@@ -149,28 +149,40 @@ const getLawyerHiring = TryCatch(
 
 const markHiringAsCompleted = TryCatch(
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-    console.log("called");
+
 
     const user: any = req.user?._id;
     const hiringId = req.params.id;
-    const hiring = await Hiring.findById({
+    const hiring: any = await Hiring.findById({
       _id: hiringId,
-    });
+    })
+      .populate("client")
+      .populate("lawyer");
+    // console.log("hiring", hiring);
     if (!hiring) {
       return next(new ErrorHandler("Hiring not found", 404));
     }
     if (
-      hiring.client.toString() !== user.toString() &&
-      hiring.lawyer.toString() !== user.toString()
+      hiring.client._id.toString() !== user.toString() &&
+      hiring.lawyer._id.toString() !== user.toString()
     ) {
       return next(
         new ErrorHandler("You are not authorized to complete this hiring", 401)
       );
     }
-    if (hiring.client.toString() === user.toString()) {
+    if (hiring.client._id.toString() === user.toString()) {
       if (hiring.lawyer_mark_as_completed) {
         hiring.client_mark_as_completed = true;
         hiring.status = "completed";
+        try {
+          await sendMail(
+            hiring?.lawyer?.email,
+            "Hiring",
+            `task has been completed by client`
+          );
+        } catch (error) {
+          return next(new ErrorHandler("Email not sent", 500));
+        }
       } else {
         return next(
           new ErrorHandler("Lawyer has not marked as completed", 400)
@@ -178,6 +190,15 @@ const markHiringAsCompleted = TryCatch(
       }
     } else {
       hiring.lawyer_mark_as_completed = true;
+      try {
+        await sendMail(
+          hiring?.client?.email,
+          "Hiring",
+          `task has been completed by lawyer`
+        );
+      } catch (error) {
+        return next(new ErrorHandler("Email not sent", 500));
+      }
     }
 
     await hiring.save();
