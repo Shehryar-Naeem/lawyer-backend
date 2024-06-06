@@ -76,6 +76,8 @@ const createGigStep1 = TryCatch(
 );
 const createGigStep2 = TryCatch(
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    console.log(req.body);
+    
     const userId = req.user?._id as string;
     const lawyer = req.user?.roles.find((role) => role.roleType === "lawyer");
     const lawyerId = lawyer?._id;
@@ -105,7 +107,7 @@ const createGigStep2 = TryCatch(
     if (!services || !price) {
       return next(new ErrorHandler("Please enter all fields", 400));
     }
-    if(price >1){
+    if(Number(price) < 1){
       return next(new ErrorHandler("Price should be positive",400 ))
     }
     if (services.length < 1) {
