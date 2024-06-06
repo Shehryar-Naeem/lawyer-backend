@@ -5,12 +5,24 @@ import { ErrorHandler } from "../utils/utility-class.js";
 import Bid from "../models/bid/bidModel.js";
 import ClientCase from "../models/clientCase/ClientCaseModel.js";
 import sendMail from "../utils/sendMail.js";
+import { Lawyer } from "../models/userModel/laywerModel.js";
 
 const sendProposal = TryCatch(
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     const { proposal, pricing } = req.body;
     const postId = req.params.id;
     const userId = req.user?._id;
+   
+    
+    const findLawyer = await Lawyer.findOne({
+      user: userId?.toString(),
+    });
+    console.log("findLawyer", findLawyer);
+    
+    if (findLawyer?.isVerified === false) {
+      return next(new ErrorHandler("Please first verified your account", 400));
+    }
+
     if (!proposal || !pricing) {
       return next(new ErrorHandler("All fields are required", 400));
     }
@@ -121,7 +133,7 @@ const acceptBid = TryCatch(
         `Your bid has been ${status} by the client ${req?.user?.name}`
       );
     } catch (error) {
-      return next(new ErrorHandler("Error sending mail", 500)); 
+      return next(new ErrorHandler("Error sending mail", 500));
     }
 
     res.status(200).json({

@@ -5,7 +5,7 @@ import { Lawyer } from "../models/userModel/laywerModel.js";
 import { User } from "../models/userModel/userModel.js";
 import { AuthenticatedRequest } from "../types/types.js";
 import { ErrorHandler } from "../utils/utility-class.js";
-import { sendMailToAdmin } from "../utils/sendMail.js";
+import sendMail, { sendMailToAdmin } from "../utils/sendMail.js";
 
 const sendVerifcationRequestToAdmin = TryCatch(
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
@@ -37,7 +37,7 @@ const sendVerifcationRequestToAdmin = TryCatch(
       !lawyer.education.institution ||
       !lawyer.education.degreeName ||
       !lawyer.cnicPicture.url ||
-      !lawyer.lawyerIdCard.url 
+      !lawyer.lawyerIdCard.url
     ) {
       return next(
         new ErrorHandler(
@@ -58,7 +58,10 @@ const sendVerifcationRequestToAdmin = TryCatch(
     const requestExists = await LawyerVerificationRequest.findOne({
       user: userId,
       lawyer: lawyerId,
+      status:"approved"
     });
+    
+    
     if (requestExists) {
       return next(new ErrorHandler("Request already sent", 400));
     }
@@ -125,7 +128,11 @@ const verifyLawyer = TryCatch(
       return next(new ErrorHandler("Request already processed", 400));
     }
     if (status === "approved") {
-      const lawyer: any = await Lawyer.findOne({ _id: request.lawyer });
+      const lawyer: any = await Lawyer.findOne({
+        _id: request.lawyer,
+      }).populate("user");
+      console.log("lawyer", lawyer);
+      
       if (!lawyer) {
         return next(new ErrorHandler("Lawyer not found", 404));
       }
@@ -135,8 +142,19 @@ const verifyLawyer = TryCatch(
       lawyer.isVerified = true;
       await lawyer.save();
       request.status = status;
+      try {
+        await sendMail(
+          lawyer.user.email,
+          "Lawyer Verification",
+          `Your verification request has been approved`
+        );
+      } catch (error) {
+        return next(new ErrorHandler("Error sending mail", 500));
+      }
     } else if (status === "rejected") {
-      const lawyer: any = await Lawyer.findOne({ _id: request.lawyer });
+      const lawyer: any = await Lawyer.findOne({
+        _id: request.lawyer,
+      }).populate("user");
       if (!lawyer) {
         return next(new ErrorHandler("Lawyer not found", 404));
       }
@@ -146,6 +164,15 @@ const verifyLawyer = TryCatch(
       lawyer.isVerified = false;
       await lawyer.save();
       request.status = status;
+      try {
+        await sendMail(
+          lawyer.user.email,
+          "Lawyer Verification",
+          `Your verification request has been rejected`
+        );
+      } catch (error) {
+        return next(new ErrorHandler("Error sending mail", 500));
+      }
     } else {
       return next(new ErrorHandler("Invalid status", 400));
     }
