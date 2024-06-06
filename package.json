@@ -15,6 +15,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/streamifier": "^0.1.2",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.2",
     "cloudinary": "^2.1.0",
@@ -29,6 +30,7 @@
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.9",
     "socket.io": "^4.7.4",
+    "streamifier": "^0.1.1",
     "uuid": "^9.0.1",
     "validator": "^13.11.0"
   },

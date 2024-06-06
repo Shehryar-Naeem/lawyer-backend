@@ -1,15 +1,14 @@
 import mongoose from "mongoose";
-import { send } from "process";
 
 const documentSchema = new mongoose.Schema({
-  postId: {
-    type: mongoose.Schema.ObjectId,
-    ref: "ClientCase",
-  },
-  gigId: {
-    type: mongoose.Schema.ObjectId,
-    ref: "Gig",
-  },
+  // postId: {
+  //   type: mongoose.Schema.ObjectId,
+  //   ref: "ClientCase",
+  // },
+  // gigId: {
+  //   type: mongoose.Schema.ObjectId,
+  //   ref: "Gig",
+  // },
   hiring: {
     type: mongoose.Schema.ObjectId,
     ref: "Hiring",

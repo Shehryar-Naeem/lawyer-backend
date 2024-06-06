@@ -2,6 +2,7 @@ import express from "express";
 
 import {
   deleteDocument,
+  findHiringPost,
   getAllDocumentsRelatedToPost,
   uploadFile,
 } from "../controller/doumentController.js";
@@ -23,5 +24,7 @@ router
 router
   .route("/delete/document/:id")
   .delete(isAuthenticatedUser, deleteDocument);
+
+router.route("/find/hiring-post/:id").get(isAuthenticatedUser, findHiringPost);
 
 export default router;

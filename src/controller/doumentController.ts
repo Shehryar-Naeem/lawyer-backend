@@ -8,6 +8,8 @@ import Document from "../models/documentModel/index.js";
 
 import { v2 as cloudinary } from "cloudinary";
 import { Gig } from "../models/GigsModel/gigModel.js";
+import Hiring from "../models/hiringModel/index.js";
+import streamifier from "streamifier";
 
 const uploadFile = TryCatch(
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
@@ -15,42 +17,42 @@ const uploadFile = TryCatch(
     console.log(files);
 
     const userId = req?.user?._id as string;
-    const postId = req.params.id as string;
+    const hiring = req.params.id as string;
+    if (!files) {
+      return next(new ErrorHandler("Please Upload Attachments", 400));
+    }
 
-    // if (files.length < 1)
-    //   return next(new ErrorHandler("Please Upload Attachments", 400));
+    if (files.length < 1)
+      return next(new ErrorHandler("Please Upload Attachments", 400));
 
-    // if (files.length > 5)
-    //   return next(new ErrorHandler("Files Can't be more than 5", 400));
+    if (files.length > 5)
+      return next(new ErrorHandler("Files Can't be more than 5", 400));
 
-    const findPost = await ClientCase.findOne({ _id: postId });
+    const findHiring = await Hiring.findOne({
+      _id: hiring,
+      $or: [{ client: userId }, { lawyer: userId }],
+    });
+    console.log("findHiring", findHiring);
 
     const findOtheId =
-      findPost?.user.toString() === userId
-        ? findPost?.hiredLawyer?.toString()
-        : findPost?.user.toString();
+      findHiring?.client.toString() === userId.toString()
+        ? findHiring?.lawyer.toString()
+        : findHiring?.client.toString();
 
-    if (!findPost) return next(new ErrorHandler("Post Not Found", 404));
-    const attachments:any = await uploadFileToCloudinary(files);
-    // const attachments = await cloudinary.uploader.upload(req.body.files, {
+    console.log("findOtheId", findOtheId);
+
+    if (!findHiring) return next(new ErrorHandler("Hiring Not Found", 404));
+
+    // const attachments = await cloudinary.uploader.upload(files[0].buffer, {
     //   folder: "documents",
-
     // });
-
-    // console.log(attachments);
-
-    // const uploadDocument = await Document.create({
-    //   postId,
-    //   file: req.files,
-    //   sender: userId,
-    //   receiver: findOtheId,
-    // });
-
+    const attachments: any = await uploadFileToCloudinary(files[0]);
+    console.log("attachments", attachments);
     const uploadDocument = await Document.create({
-      postId,
+      hiring,
       file: {
         public_id: attachments.public_id,
-        url: attachments.secure_url,
+        url: attachments.url,
       },
       sender: userId,
       receiver: findOtheId,
@@ -60,135 +62,37 @@ const uploadFile = TryCatch(
       success: true,
       data: uploadDocument,
     });
-
   }
 );
 
-// const uploadFile = TryCatch(
-//   async (req: any, res: Response, next: NextFunction) => {
-//     const files = req.body.files as any;
-//     console.log(files);
-
-//     const userId = req.user._id as string;
-//     const postId = req.params.id as string;
-
-//     // if (files.length < 1)
-//     //   return next(new ErrorHandler("Please Upload Attachments", 400));
-
-//     // if (files.length > 5)
-//     //   return next(new ErrorHandler("Files Can't be more than 5", 400));
-
-//     const findPost = await ClientCase.findOne({ _id: postId });
-
-//     const findOtheId =
-//       findPost?.user.toString() === userId
-//         ? findPost?.hiredLawyer?.toString()
-//         : findPost?.user.toString();
-
-//     if (!findPost) return next(new ErrorHandler("Post Not Found", 404));
-//     // const attachments = await uploadFileToCloudinary(files);
-//     const attachments = await cloudinary.uploader.upload(req.body.files, {
-//       folder: "documents",
-
-//     });
-
-//     console.log(attachments);
-
-//     const uploadDocument = await Document.create({
-//       postId,
-//       file: {
-//         public_id: attachments.public_id,
-//         url: attachments.secure_url,
-//       },
-//       sender: userId,
-//       receiver: findOtheId,
-//     });
-
-//     res.status(200).json({
-//       success: true,
-//       data: uploadDocument,
-//     });
-//   }
-// );
-
-// const uploadFile = TryCatch(
-//   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-//     const files = req.files as any;
-//     console.log(files);
-
-//     const userId = req?.user?._id as string;
-//     const postId: any = req.params.id as string;
-//     const { type } = req.body;
-
-//     const hiringI = await Hiring.findById({
-//       _id: postId.toString(),
-//     });
-
-//     if (type === "job") {
-//       const findPost = await ClientCase.findOne({ _id: postId });
-
-//       const findOtherId =
-//         findPost?.user.toString() === userId
-//           ? findPost?.hiredLawyer?.toString()
-//           : findPost?.user.toString();
-
-//       if (!findPost) return next(new ErrorHandler("Post Not Found", 404));
-
-//       // Create an array to store file URLs
-//       const fileURL = files[0].path;
-//       console.log(fileURL);
-
-//       // Create a new document entry in the database
-//       const uploadDocuments = await Document.create({
-//         postId,
-//         file: fileURL, // Store file URLs in the "files" field
-//         sender: userId,
-//         receiver: findOtherId,
-//       });
-
-//       res.status(200).json({
-//         success: true,
-//         data: uploadDocuments,
-//       });
-//     } else if (type === "gig") {
-//       const findPost = await Gig.findOne({ _id: postId });
-
-//       const findOtherId =
-//         findPost?.user.toString() === userId
-//           ? findPost?.lawyer?.toString()
-//           : findPost?.user.toString();
-
-//       if (!findPost) return next(new ErrorHandler("Post Not Found", 404));
-
-//       // Create an array to store file URLs
-//       const fileURL = files[0].path;
-
-//       // Create a new document entry in the database
-//       const uploadDocuments = await Document.create({
-//         gigId: postId,
-//         file: fileURL, // Store file URLs in the "files" field
-//         sender: userId,
-//         receiver: findOtherId,
-//       });
-
-//       res.status(200).json({
-//         success: true,
-//         data: uploadDocuments,
-//       });
-//     }
-//   }
-// );
 const getAllDocumentsRelatedToPost = TryCatch(
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     const postId = req.params.id as string;
     const userId = req?.user?._id as string;
 
-    const findPost = await ClientCase.findOne({ _id: postId });
+    // const findPost = await ClientCase.findOne({ _id: postId });
 
-    if (!findPost) return next(new ErrorHandler("Post Not Found", 404));
+    // if (!findPost) return next(new ErrorHandler("Post Not Found", 404));
+    const hiring: any = await Hiring.findOne({
+      _id: postId,
+      $or: [{ client: userId }, { lawyer: userId }],
+    });
+
+    if (!hiring) return next(new ErrorHandler("Hiring Not Found", 404));
+
+    console.log(hiring);
+
+    if (hiring.type === "job") {
+      const findJob = await ClientCase.findOne({ _id: hiring.case.toString() });
+      if (!findJob) return next(new ErrorHandler("Post Not Found", 404));
+    }
+    if (hiring.type === "gig") {
+      const findGig = await Gig.findOne({ _id: hiring.gig.toString() });
+      if (!findGig) return next(new ErrorHandler("Post Not Found", 404));
+    }
 
     const documents = await Document.find({
-      postId: postId,
+      hiring: postId,
       $or: [{ sender: userId }, { receiver: userId }],
     });
     // console.log(documents);
@@ -220,4 +124,44 @@ const deleteDocument = TryCatch(
   }
 );
 
-export { uploadFile, getAllDocumentsRelatedToPost, deleteDocument };
+const findHiringPost = TryCatch(
+  async (req: any, res: Response, next: NextFunction) => {
+    const postId = req.params.id as string;
+    const userId = req?.user?._id as string;
+
+    const hiring = await Hiring.findOne({
+      _id: postId,
+      $or: [{ client: userId }, { lawyer: userId }],
+    });
+
+    if (!hiring) return next(new ErrorHandler("Hiring Not Found", 404));
+
+    if (hiring.case) {
+      const findJob = await ClientCase.findOne({
+        _id: hiring.case.toString(),
+      }).populate("user");
+      if (!findJob) return next(new ErrorHandler("Post Not Found", 404));
+      return res.status(200).json({
+        success: true,
+        job: findJob,
+      });
+    }
+    if (hiring.gig) {
+      const findGig = await Gig.findOne({
+        _id: hiring.gig.toString(),
+      }).populate("user");
+      if (!findGig) return next(new ErrorHandler("Post Not Found", 404));
+      return res.status(200).json({
+        success: true,
+        gig: findGig,
+      });
+    }
+  }
+);
+
+export {
+  uploadFile,
+  getAllDocumentsRelatedToPost,
+  deleteDocument,
+  findHiringPost,
+};
