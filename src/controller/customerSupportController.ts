@@ -17,7 +17,8 @@ const customerSupportMessage = TryCatch(
       message,
     });
 
-    await sendMailToAdmin(email, "Customer Support Message", message);
+    await sendMailToAdmin(email,`Customer support ${name}`, `message: ${message} from ${email}`);
+
     res.status(200).json({
       success: true,
       message: "Customer support message sent successfully",
